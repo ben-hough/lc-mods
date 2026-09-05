@@ -1,3 +1,7 @@
+## 1.0.3
+- 10s heartbeat log (phase/player/canvas state)
+- Stop using HideAndDontSave on HUD object
+
 ## 1.0.2
 - Replace IMGUI with TextMeshPro screen-space canvas HUD (survives moon loads)
 - Recreate HUD on StartOfRound / HUDManager Start

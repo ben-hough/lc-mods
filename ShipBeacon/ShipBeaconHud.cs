@@ -18,6 +18,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
     private float _nextDebugLog;
     private string _lastHideReason = "";
     private bool _loggedVisible;
+    private float _nextHeartbeat;
 
     internal static void EnsureExists()
     {
@@ -26,7 +27,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
         var go = new GameObject("ShipBeaconHUD");
         DontDestroyOnLoad(go);
-        go.hideFlags = HideFlags.HideAndDontSave;
+        // keep visible to Unity update loop
         _instance = go.AddComponent<ShipBeaconHud>();
     }
 
@@ -102,6 +103,17 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (Time.unscaledTime >= _nextHeartbeat)
+        {
+            _nextHeartbeat = Time.unscaledTime + 10f;
+            var start = StartOfRound.Instance;
+            var player = GameNetworkManager.Instance?.localPlayerController;
+            Plugin.Log.LogInfo(
+                $("[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
+                $"inShipPhase={start?.inShipPhase}, playerNull={player == null}, dead={player?.isPlayerDead}, " +
+                $"insideFactory={player?.isInsideFactory}, inShip={player?.isInHangarShipRoom}");
+        }
+
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
         {
             SetVisible(false);
