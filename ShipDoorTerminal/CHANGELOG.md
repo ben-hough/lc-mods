@@ -1,8 +1,11 @@
+## 1.0.2
+- Manually Harmony-patch ParseWord / OnSubmit / ParsePlayerSentence (PatchAll was not firing)
+- Intercept ParseWord where vanilla logs "Could not parse word"
+- VerboseLogging config (default on) for submit/parse/word traces
+- Accept dooropen / doorclose aliases
+
 ## 1.0.1
-- Fix commands not registering (`Could not parse word: door`)
-- Capture input on `Terminal.OnSubmit` (v81 clears text before parse)
-- Register `door` / `doors` / `opendoor` / `closedoor` keywords
-- Drive doors via `HangarShipDoor.SetDoorOpen` / `SetDoorClosed`
+- Attempted OnSubmit capture + keyword registration
 
 ## 1.0.0
-- Initial terminal commands for ship hangar doors
+- Initial release

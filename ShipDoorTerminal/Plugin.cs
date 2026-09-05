@@ -1,8 +1,9 @@
+using System;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using System.Reflection;
+using UnityEngine;
 
 namespace ShipDoorTerminal;
 
@@ -11,11 +12,12 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipDoorTerminal";
     public const string ModName = "ShipDoorTerminal";
-    public const string ModVersion = "1.0.1";
+    public const string ModVersion = "1.0.2";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
     internal static ConfigEntry<bool> Enabled { get; private set; } = null!;
+    internal static ConfigEntry<bool> Verbose { get; private set; } = null!;
 
     private readonly Harmony _harmony = new(ModGuid);
 
@@ -24,19 +26,20 @@ public class Plugin : BaseUnityPlugin
         Instance = this;
         Log = Logger;
 
-        Enabled = Config.Bind(
-            "General",
-            "Enabled",
-            true,
-            "Enable terminal commands: door / doors (toggle), opendoor, closedoor.");
+        Enabled = Config.Bind("General", "Enabled", true,
+            "Enable terminal commands: door / doors / opendoor / closedoor.");
+        Verbose = Config.Bind("General", "VerboseLogging", true,
+            "Log every terminal submit/parse/word attempt (noisy, for debugging).");
 
-        _harmony.PatchAll(typeof(Plugin).Assembly);
+        ManualPatches.Apply(_harmony);
 
-        var parse = AccessTools.Method(typeof(Terminal), "ParsePlayerSentence");
-        var submit = AccessTools.Method(typeof(Terminal), "OnSubmit");
-        Log.LogInfo($"Patched Terminal.ParsePlayerSentence={parse != null}, OnSubmit={submit != null}");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded. Verbose={Verbose.Value}");
+    }
 
-        Log.LogInfo($"{ModName} v{ModVersion} loaded.");
+    internal static void V(string msg)
+    {
+        if (Verbose != null && Verbose.Value)
+            Log.LogInfo(msg);
     }
 }
 

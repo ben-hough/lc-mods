@@ -1,17 +1,74 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using UnityEngine;
 
-namespace ShipDoorTerminal.Patches;
+namespace ShipDoorTerminal;
 
-/// <summary>
-/// Capture terminal input on submit, then intercept ParsePlayerSentence.
-/// v81 often clears/changes textAdded before parse, so we cannot rely on it alone.
-/// </summary>
-internal static class TerminalInputCapture
+internal static class ManualPatches
+{
+    internal static void Apply(Harmony harmony)
+    {
+        try
+        {
+            var parseWord = AccessTools.Method(typeof(Terminal), "ParseWord", new[] { typeof(string), typeof(int) });
+            var onSubmit = AccessTools.Method(typeof(Terminal), "OnSubmit");
+            var parseSentence = AccessTools.Method(typeof(Terminal), "ParsePlayerSentence");
+            var awake = AccessTools.Method(typeof(Terminal), "Awake");
+            var start = AccessTools.Method(typeof(Terminal), "Start");
+
+            Plugin.Log.LogInfo(
+                $"Manual patch resolve: ParseWord={Fmt(parseWord)}, OnSubmit={Fmt(onSubmit)}, " +
+                $"ParsePlayerSentence={Fmt(parseSentence)}, Awake={Fmt(awake)}, Start={Fmt(start)}");
+
+            if (parseWord != null)
+            {
+                harmony.Patch(parseWord,
+                    prefix: new HarmonyMethod(typeof(ParseWordPatch), nameof(ParseWordPatch.Prefix)));
+                Plugin.Log.LogInfo("Patched Terminal.ParseWord (prefix)");
+            }
+
+            if (onSubmit != null)
+            {
+                harmony.Patch(onSubmit,
+                    prefix: new HarmonyMethod(typeof(OnSubmitPatch), nameof(OnSubmitPatch.Prefix)));
+                Plugin.Log.LogInfo("Patched Terminal.OnSubmit (prefix)");
+            }
+
+            if (parseSentence != null)
+            {
+                harmony.Patch(parseSentence,
+                    prefix: new HarmonyMethod(typeof(ParseSentencePatch), nameof(ParseSentencePatch.Prefix)));
+                Plugin.Log.LogInfo("Patched Terminal.ParsePlayerSentence (prefix)");
+            }
+
+            if (awake != null)
+            {
+                harmony.Patch(awake,
+                    postfix: new HarmonyMethod(typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.AwakePostfix)));
+                Plugin.Log.LogInfo("Patched Terminal.Awake (postfix)");
+            }
+
+            if (start != null)
+            {
+                harmony.Patch(start,
+                    postfix: new HarmonyMethod(typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.StartPostfix)));
+                Plugin.Log.LogInfo("Patched Terminal.Start (postfix)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogError($"ManualPatches.Apply failed: {ex}");
+        }
+    }
+
+    private static string Fmt(MethodInfo? m) =>
+        m == null ? "NULL" : $"{m.DeclaringType?.Name}.{m.Name} ({(m.IsPublic ? "public" : "nonpublic")})";
+}
+
+internal static class TerminalInput
 {
     internal static string? LastSubmitted;
 
@@ -19,225 +76,263 @@ internal static class TerminalInputCapture
     {
         if (string.IsNullOrEmpty(raw))
             return "";
-
         var s = raw.ToLowerInvariant();
         s = Regex.Replace(s, @"[^a-z0-9\s]", " ");
         s = Regex.Replace(s, @"\s+", " ").Trim();
         return s;
     }
 
-    internal static string ExtractFromScreen(Terminal terminal)
+    internal static string Extract(Terminal terminal)
     {
         try
         {
             var text = terminal.screenText != null ? terminal.screenText.text : null;
+            Plugin.V($"Extract screenText len={text?.Length ?? -1}, textAdded={terminal.textAdded}");
             if (string.IsNullOrEmpty(text))
                 return "";
 
             if (terminal.textAdded > 0 && text.Length >= terminal.textAdded)
-                return Normalize(text.Substring(text.Length - terminal.textAdded));
+            {
+                var slice = text.Substring(text.Length - terminal.textAdded);
+                Plugin.V($"Extract via textAdded: '{Normalize(slice)}'");
+                return Normalize(slice);
+            }
 
-            // Fallback: last line / after last prompt-like break.
             var idx = text.LastIndexOf('\n');
             var last = idx >= 0 ? text.Substring(idx + 1) : text;
             last = last.Trim().TrimStart('>', ' ');
+            Plugin.V($"Extract via last-line: '{Normalize(last)}'");
             return Normalize(last);
         }
-        catch
+        catch (Exception ex)
         {
+            Plugin.Log.LogWarning($"Extract failed: {ex.Message}");
             return "";
         }
     }
-}
 
-[HarmonyPatch(typeof(Terminal), nameof(Terminal.OnSubmit))]
-internal static class TerminalOnSubmitPatch
-{
-    private static void Prefix(Terminal __instance)
-    {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value)
-            return;
-
-        TerminalInputCapture.LastSubmitted = TerminalInputCapture.ExtractFromScreen(__instance);
-        if (!string.IsNullOrEmpty(TerminalInputCapture.LastSubmitted))
-            Plugin.Log.LogDebug($"Terminal submit captured: '{TerminalInputCapture.LastSubmitted}'");
-    }
-}
-
-[HarmonyPatch(typeof(Terminal), "ParsePlayerSentence")]
-internal static class TerminalDoorPatch
-{
-    private static readonly HashSet<string> DoorCommands = new(StringComparer.Ordinal)
+    private static readonly HashSet<string> Commands = new(StringComparer.Ordinal)
     {
         "door", "doors",
-        "opendoor", "open door", "door open",
-        "closedoor", "close door", "door close",
+        "opendoor", "open door", "door open", "dooropen",
+        "closedoor", "close door", "door close", "doorclose",
     };
 
-    private static bool Prefix(Terminal __instance, ref TerminalNode __result)
+    internal static bool IsDoorCommand(string input) => Commands.Contains(input);
+}
+
+internal static class OnSubmitPatch
+{
+    // Return false = skip vanilla OnSubmit entirely for our commands.
+    public static bool Prefix(Terminal __instance)
     {
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
             return true;
 
         try
         {
-            var input = TerminalInputCapture.LastSubmitted;
-            if (string.IsNullOrEmpty(input))
-                input = TerminalInputCapture.ExtractFromScreen(__instance);
+            var input = TerminalInput.Extract(__instance);
+            TerminalInput.LastSubmitted = input;
+            Plugin.Log.LogInfo($"[OnSubmit] captured='{input}'");
 
-            TerminalInputCapture.LastSubmitted = null;
-
-            if (string.IsNullOrEmpty(input) || !DoorCommands.Contains(input))
+            if (!TerminalInput.IsDoorCommand(input))
                 return true;
 
-            Plugin.Log.LogInfo($"Handling ship-door command: '{input}'");
+            var response = DoorActions.Run(input);
+            Plugin.Log.LogInfo($"[OnSubmit] handling '{input}' -> {response.Replace("\n", " ")}");
 
-            string response = input switch
-            {
-                "door" or "doors" => DoorCommandsUtil.ToggleDoor(),
-                "opendoor" or "open door" or "door open" => DoorCommandsUtil.SetDoor(closed: false),
-                "closedoor" or "close door" or "door close" => DoorCommandsUtil.SetDoor(closed: true),
-                _ => "Unknown door command.\n",
-            };
-
-            __result = DoorCommandsUtil.CreateNode(response);
+            var node = DoorActions.CreateNode(response);
+            __instance.LoadNewNode(node);
             return false;
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning($"Ship door terminal command failed: {ex.Message}");
+            Plugin.Log.LogWarning($"[OnSubmit] failed: {ex}");
             return true;
         }
     }
 }
 
-/// <summary>
-/// Also inject keywords so vanilla ParseWord can resolve them if sentence parse misses.
-/// Actions still run via ParsePlayerSentence intercept above when possible.
-/// </summary>
-[HarmonyPatch(typeof(Terminal), "Awake")]
-internal static class TerminalAwakePatch
+internal static class ParseWordPatch
 {
-    private static void Postfix(Terminal __instance)
+    public static bool Prefix(string playerWord, int specificityRequired, ref TerminalKeyword __result)
     {
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
-            return;
+            return true;
 
         try
         {
-            DoorKeywordRegistry.EnsureRegistered(__instance);
+            var word = TerminalInput.Normalize(playerWord);
+            Plugin.V($"[ParseWord] word='{playerWord}' normalized='{word}' specificity={specificityRequired}");
+
+            if (!TerminalInput.IsDoorCommand(word))
+                return true;
+
+            // Run action here too — ParseWord is where vanilla logs "Could not parse word".
+            var response = DoorActions.Run(word);
+            Plugin.Log.LogInfo($"[ParseWord] intercept '{word}' -> {response.Replace("\n", " ")}");
+
+            __result = DoorActions.GetOrCreateKeyword(word, response);
+            return false;
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning($"Failed to register door keywords: {ex.Message}");
+            Plugin.Log.LogWarning($"[ParseWord] failed: {ex}");
+            return true;
         }
     }
 }
 
-[HarmonyPatch(typeof(Terminal), "Start")]
-internal static class TerminalStartPatch
+internal static class ParseSentencePatch
 {
-    private static void Postfix(Terminal __instance)
+    public static bool Prefix(Terminal __instance, ref TerminalNode __result)
     {
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
-            return;
+            return true;
 
         try
         {
-            DoorKeywordRegistry.EnsureRegistered(__instance);
+            var input = TerminalInput.LastSubmitted;
+            if (string.IsNullOrEmpty(input))
+                input = TerminalInput.Extract(__instance);
+
+            Plugin.V($"[ParseSentence] input='{input}'");
+
+            if (string.IsNullOrEmpty(input) || !TerminalInput.IsDoorCommand(input))
+                return true;
+
+            var response = DoorActions.Run(input);
+            Plugin.Log.LogInfo($"[ParseSentence] handling '{input}'");
+            __result = DoorActions.CreateNode(response);
+            TerminalInput.LastSubmitted = null;
+            return false;
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning($"Failed to register door keywords on Start: {ex.Message}");
+            Plugin.Log.LogWarning($"[ParseSentence] failed: {ex}");
+            return true;
         }
     }
 }
 
-internal static class DoorKeywordRegistry
+internal static class TerminalLifecyclePatch
 {
-    private static bool _done;
-
-    internal static void EnsureRegistered(Terminal terminal)
+    public static void AwakePostfix(Terminal __instance)
     {
-        if (_done || terminal?.terminalNodes == null)
-            return;
+        Plugin.Log.LogInfo("[Terminal.Awake] postfix hit");
+        DoorActions.EnsureKeywordsRegistered(__instance);
+    }
 
-        var list = terminal.terminalNodes;
-        if (list.allKeywords == null)
-            return;
-
-        var existing = new HashSet<string>(
-            list.allKeywords.Where(k => k != null && k.word != null).Select(k => k.word.ToLowerInvariant()));
-
-        var added = new List<TerminalKeyword>();
-        void Add(string word, string display)
-        {
-            if (existing.Contains(word))
-                return;
-
-            var node = ScriptableObject.CreateInstance<TerminalNode>();
-            node.displayText = display;
-            node.clearPreviousText = true;
-            node.maxCharactersToType = 40;
-
-            var keyword = ScriptableObject.CreateInstance<TerminalKeyword>();
-            keyword.word = word;
-            keyword.isVerb = false;
-            keyword.specialKeywordResult = node;
-            added.Add(keyword);
-            existing.Add(word);
-        }
-
-        // Keyword-only path shows text; ParsePlayerSentence still performs the door action when it matches.
-        Add("door", "Toggling ship doors...\n");
-        Add("doors", "Toggling ship doors...\n");
-        Add("opendoor", "Opening ship doors...\n");
-        Add("closedoor", "Closing ship doors...\n");
-
-        if (added.Count == 0)
-        {
-            _done = true;
-            return;
-        }
-
-        list.allKeywords = list.allKeywords.Concat(added).ToArray();
-        _done = true;
-        Plugin.Log.LogInfo($"Registered terminal keywords: {string.Join(", ", added.Select(k => k.word))}");
+    public static void StartPostfix(Terminal __instance)
+    {
+        Plugin.Log.LogInfo("[Terminal.Start] postfix hit");
+        DoorActions.EnsureKeywordsRegistered(__instance);
     }
 }
 
-internal static class DoorCommandsUtil
+internal static class DoorActions
 {
+    private static readonly Dictionary<string, TerminalKeyword> Keywords = new();
+    private static bool _registered;
+
     internal static TerminalNode CreateNode(string text)
     {
         var node = ScriptableObject.CreateInstance<TerminalNode>();
         node.displayText = text.EndsWith("\n") ? text : text + "\n";
         node.clearPreviousText = true;
-        node.maxCharactersToType = 50;
+        node.maxCharactersToType = 60;
         return node;
     }
 
-    internal static string ToggleDoor()
+    internal static TerminalKeyword GetOrCreateKeyword(string word, string display)
     {
-        var start = StartOfRound.Instance;
-        if (start == null)
-            return "Ship doors unavailable.\n";
+        if (Keywords.TryGetValue(word, out var existing) && existing != null)
+        {
+            if (existing.specialKeywordResult != null)
+                existing.specialKeywordResult.displayText = display.EndsWith("\n") ? display : display + "\n";
+            return existing;
+        }
 
-        // Allow in orbit too if doors object exists; otherwise require landed.
-        var door = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
-        if (door == null && !start.shipDoorsEnabled)
-            return "Ship doors unavailable (not landed?).\n";
-
-        return SetDoor(closed: !start.hangarDoorsClosed);
+        var node = CreateNode(display);
+        var keyword = ScriptableObject.CreateInstance<TerminalKeyword>();
+        keyword.word = word.Contains(" ") ? word.Split(' ')[0] : word;
+        keyword.isVerb = false;
+        keyword.specialKeywordResult = node;
+        Keywords[word] = keyword;
+        return keyword;
     }
 
-    internal static string SetDoor(bool closed)
+    internal static void EnsureKeywordsRegistered(Terminal terminal)
+    {
+        try
+        {
+            if (terminal?.terminalNodes?.allKeywords == null)
+            {
+                Plugin.Log.LogInfo("Keyword register skipped: terminalNodes/allKeywords null");
+                return;
+            }
+
+            if (_registered)
+            {
+                Plugin.V("Keywords already registered");
+                return;
+            }
+
+            var list = new List<TerminalKeyword>(terminal.terminalNodes.allKeywords);
+            void Add(string word)
+            {
+                if (list.Exists(k => k != null && k.word == word))
+                    return;
+                list.Add(GetOrCreateKeyword(word, $"Ship door command: {word}\n"));
+            }
+
+            Add("door");
+            Add("doors");
+            Add("opendoor");
+            Add("closedoor");
+            Add("dooropen");
+            Add("doorclose");
+
+            terminal.terminalNodes.allKeywords = list.ToArray();
+            _registered = true;
+            Plugin.Log.LogInfo($"Registered door keywords into allKeywords (count now {list.Count})");
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogWarning($"EnsureKeywordsRegistered failed: {ex.Message}");
+        }
+    }
+
+    internal static string Run(string input)
+    {
+        return input switch
+        {
+            "door" or "doors" => Toggle(),
+            "opendoor" or "open door" or "door open" or "dooropen" => Set(closed: false),
+            "closedoor" or "close door" or "door close" or "doorclose" => Set(closed: true),
+            _ => "Unknown door command.\n",
+        };
+    }
+
+    private static string Toggle()
+    {
+        var start = StartOfRound.Instance;
+        if (start == null)
+            return "Ship doors unavailable.\n";
+        return Set(closed: !start.hangarDoorsClosed);
+    }
+
+    private static string Set(bool closed)
     {
         var start = StartOfRound.Instance;
         if (start == null)
             return "Ship doors unavailable.\n";
 
         var door = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+        Plugin.Log.LogInfo(
+            $"[Door] closed={closed}, hangarDoorsClosed={start.hangarDoorsClosed}, " +
+            $"shipDoorsEnabled={start.shipDoorsEnabled}, doorNull={door == null}, overheated={door?.overheated}");
+
         if (door != null && door.overheated)
             return "Ship doors are overheated and cannot be toggled.\n";
 
@@ -252,8 +347,6 @@ internal static class DoorCommandsUtil
                     door.SetDoorClosed();
                 else
                     door.SetDoorOpen();
-
-                // Keep animator/network state in sync when available.
                 door.PlayDoorAnimation(closed);
             }
 
@@ -261,15 +354,9 @@ internal static class DoorCommandsUtil
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning($"Door toggle failed, trying SetShipDoorsClosed only: {ex.Message}");
-            try
-            {
-                start.SetShipDoorsClosed(closed);
-            }
-            catch (Exception ex2)
-            {
-                return $"Failed to toggle ship doors: {ex2.Message}\n";
-            }
+            Plugin.Log.LogWarning($"[Door] toggle error: {ex.Message}");
+            try { start.SetShipDoorsClosed(closed); }
+            catch (Exception ex2) { return $"Failed to toggle ship doors: {ex2.Message}\n"; }
         }
 
         return closed ? "Closing ship doors...\n" : "Opening ship doors...\n";
