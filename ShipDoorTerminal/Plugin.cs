@@ -2,6 +2,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using System.Reflection;
 
 namespace ShipDoorTerminal;
 
@@ -10,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipDoorTerminal";
     public const string ModName = "ShipDoorTerminal";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.1";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -30,6 +31,11 @@ public class Plugin : BaseUnityPlugin
             "Enable terminal commands: door / doors (toggle), opendoor, closedoor.");
 
         _harmony.PatchAll(typeof(Plugin).Assembly);
+
+        var parse = AccessTools.Method(typeof(Terminal), "ParsePlayerSentence");
+        var submit = AccessTools.Method(typeof(Terminal), "OnSubmit");
+        Log.LogInfo($"Patched Terminal.ParsePlayerSentence={parse != null}, OnSubmit={submit != null}");
+
         Log.LogInfo($"{ModName} v{ModVersion} loaded.");
     }
 }

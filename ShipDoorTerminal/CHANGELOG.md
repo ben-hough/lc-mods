@@ -1,5 +1,8 @@
-# Changelog
+## 1.0.1
+- Fix commands not registering (`Could not parse word: door`)
+- Capture input on `Terminal.OnSubmit` (v81 clears text before parse)
+- Register `door` / `doors` / `opendoor` / `closedoor` keywords
+- Drive doors via `HangarShipDoor.SetDoorOpen` / `SetDoorClosed`
 
 ## 1.0.0
-
-- Terminal commands: `door`/`doors` (toggle), `opendoor`, `closedoor`
+- Initial terminal commands for ship hangar doors
