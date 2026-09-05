@@ -1,6 +1,6 @@
 {
   "name": "WeedKillerRefill",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/ben-hough/lc-weed-killer-refill",
   "description": "Refill an empty weed killer can with a key press (default R).",
   "dependencies": [

@@ -4,103 +4,51 @@ using UnityEngine;
 namespace WeedKillerRefill;
 
 /// <summary>
-/// While holding an empty weed killer bottle, press the configured key to refill the tank.
+/// While holding an empty weed killer bottle, press the configured key to refill tank + battery.
 /// </summary>
 internal sealed class WeedKillerRefillBehaviour : MonoBehaviour
 {
-    private GUIStyle? _hintStyle;
-    private float _hintUntil;
+    private bool _loggedHoldingEmpty;
 
     private void Update()
     {
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
             return;
 
-        if (!TryGetHeldWeedKiller(out var spray))
+        if (!WeedKillerUtil.TryGetHeldWeedKiller(out var spray))
+        {
+            _loggedHoldingEmpty = false;
+            return;
+        }
+
+        var empty = WeedKillerUtil.IsEmpty(spray);
+        if (empty && !_loggedHoldingEmpty)
+        {
+            _loggedHoldingEmpty = true;
+            Plugin.Log.LogInfo(
+                $"Holding empty weed killer (tank={spray.sprayCanTank:0.###}, tryingEmpty={spray.tryingToUseEmptyCan}). Press {Plugin.RefillKey.Value} to refill.");
+        }
+        else if (!empty)
+        {
+            _loggedHoldingEmpty = false;
+        }
+
+        if (!InputUtil.WasPressedThisFrame(Plugin.RefillKey.Value))
             return;
 
-        var empty = spray.sprayCanTank <= Plugin.EmptyThreshold.Value;
-        if (Plugin.ShowHint.Value && empty)
-            _hintUntil = Time.unscaledTime + 0.25f;
-
-        if (!Input.GetKeyDown(Plugin.RefillKey.Value))
-            return;
+        Plugin.Log.LogInfo($"Refill key {Plugin.RefillKey.Value} pressed (empty={empty}, tank={spray.sprayCanTank:0.###}).");
 
         if (Plugin.OnlyWhenEmpty.Value && !empty)
             return;
 
         try
         {
-            spray.sprayCanTank = 1f;
-            spray.tryingToUseEmptyCan = false;
-            spray.sprayCanShakeMeter = 0f;
-
-            Plugin.Log.LogInfo("Refilled weed killer tank.");
-            _hintUntil = Time.unscaledTime + 1.25f;
+            WeedKillerUtil.Refill(spray);
+            Plugin.Log.LogInfo("Refilled weed killer tank + battery.");
         }
         catch (Exception ex)
         {
             Plugin.Log.LogWarning($"Failed to refill weed killer: {ex.Message}");
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (!Plugin.ShowHint.Value || Time.unscaledTime > _hintUntil)
-            return;
-
-        if (!TryGetHeldWeedKiller(out var spray))
-            return;
-
-        var empty = spray.sprayCanTank <= Plugin.EmptyThreshold.Value;
-        if (!empty && Time.unscaledTime > _hintUntil - 1f)
-            return;
-
-        _hintStyle ??= new GUIStyle(GUI.skin.box)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 16,
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = Color.white },
-            padding = new RectOffset(10, 10, 6, 6),
-        };
-
-        var key = Plugin.RefillKey.Value.ToString();
-        var msg = empty
-            ? $"Weed killer empty — press {key} to refill"
-            : $"Weed killer refilled ({key})";
-
-        var size = _hintStyle.CalcSize(new GUIContent(msg));
-        var rect = new Rect(
-            (Screen.width - size.x) * 0.5f,
-            Screen.height * 0.72f,
-            size.x,
-            size.y);
-        GUI.Label(rect, msg, _hintStyle);
-    }
-
-    private static bool TryGetHeldWeedKiller(out SprayPaintItem spray)
-    {
-        spray = null!;
-        try
-        {
-            var player = GameNetworkManager.Instance?.localPlayerController;
-            if (player == null || player.isPlayerDead)
-                return false;
-
-            var held = player.currentlyHeldObjectServer;
-            if (held is not SprayPaintItem item)
-                return false;
-
-            if (!item.isWeedKillerSprayBottle)
-                return false;
-
-            spray = item;
-            return true;
-        }
-        catch
-        {
-            return false;
         }
     }
 }
