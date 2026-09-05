@@ -1,8 +1,10 @@
+## 1.0.2
+- Replace IMGUI with TextMeshPro screen-space canvas HUD (survives moon loads)
+- Recreate HUD on StartOfRound / HUDManager Start
+- Log when visible and when hidden (reason)
+
 ## 1.0.1
-- Use ASCII arrows (Unicode arrows often invisible in IMGUI fonts)
-- Loosen outdoor checks (no longer require shipDoorsEnabled)
-- Fall back to shipLandingPosition; log why the HUD is hidden
-- Nudge default vertical offset so it clears the top HUD
+- ASCII arrows, looser outdoor checks, hide-reason logging
 
 ## 1.0.0
 - Initial outdoor ship direction + distance HUD

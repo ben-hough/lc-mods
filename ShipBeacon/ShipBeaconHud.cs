@@ -1,69 +1,152 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ShipBeacon;
 
 /// <summary>
-/// Outdoor HUD pointing toward the ship. Uses ASCII arrows (Unicode often fails in IMGUI fonts).
+/// Outdoor ship direction HUD using a Screen Space Overlay canvas (IMGUI often dies after moon load).
 /// </summary>
 internal sealed class ShipBeaconHud : MonoBehaviour
 {
-    private GUIStyle? _style;
-    private Texture2D? _bg;
+    private static ShipBeaconHud? _instance;
+
+    private Canvas? _canvas;
+    private TextMeshProUGUI? _label;
+    private RectTransform? _labelRt;
     private float _nextDebugLog;
     private string _lastHideReason = "";
+    private bool _loggedVisible;
 
-    private void EnsureStyles()
+    internal static void EnsureExists()
     {
-        if (_style != null)
+        if (_instance != null)
             return;
 
-        _bg = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-        _bg.SetPixel(0, 0, new Color(0f, 0f, 0f, 0.55f));
-        _bg.Apply();
-
-        _style = new GUIStyle(GUI.skin.box)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = Mathf.RoundToInt(20f * Plugin.HudScale.Value),
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.9f, 0.95f, 1f, 1f), background = _bg },
-            padding = new RectOffset(14, 14, 8, 8),
-        };
+        var go = new GameObject("ShipBeaconHUD");
+        DontDestroyOnLoad(go);
+        go.hideFlags = HideFlags.HideAndDontSave;
+        _instance = go.AddComponent<ShipBeaconHud>();
     }
 
-    private void OnGUI()
+    private void Awake()
     {
-        if (Event.current.type != EventType.Repaint)
+        _instance = this;
+        BuildUi();
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+            _instance = null;
+    }
+
+    private void BuildUi()
+    {
+        if (_canvas != null)
             return;
 
+        _canvas = gameObject.AddComponent<Canvas>();
+        _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        _canvas.sortingOrder = 1200;
+
+        var scaler = gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        gameObject.AddComponent<GraphicRaycaster>();
+
+        var textGo = new GameObject("ShipBeaconLabel", typeof(RectTransform));
+        textGo.transform.SetParent(transform, false);
+
+        _labelRt = textGo.GetComponent<RectTransform>();
+        _labelRt.anchorMin = new Vector2(0.5f, Plugin.VerticalOffset.Value);
+        _labelRt.anchorMax = new Vector2(0.5f, Plugin.VerticalOffset.Value);
+        _labelRt.pivot = new Vector2(0.5f, 0.5f);
+        _labelRt.sizeDelta = new Vector2(640f, 64f);
+        _labelRt.anchoredPosition = Vector2.zero;
+
+        // Soft backdrop via Image behind text.
+        var bgGo = new GameObject("ShipBeaconBg", typeof(RectTransform));
+        bgGo.transform.SetParent(textGo.transform, false);
+        bgGo.transform.SetAsFirstSibling();
+        var bgRt = bgGo.GetComponent<RectTransform>();
+        bgRt.anchorMin = Vector2.zero;
+        bgRt.anchorMax = Vector2.one;
+        bgRt.offsetMin = new Vector2(-12f, -6f);
+        bgRt.offsetMax = new Vector2(12f, 6f);
+        var bg = bgGo.AddComponent<Image>();
+        bg.color = new Color(0f, 0f, 0f, 0.55f);
+        bg.raycastTarget = false;
+
+        _label = textGo.AddComponent<TextMeshProUGUI>();
+        _label.alignment = TextAlignmentOptions.Center;
+        _label.fontStyle = FontStyles.Bold;
+        _label.color = new Color(0.9f, 0.96f, 1f, 1f);
+        _label.enableWordWrapping = false;
+        _label.raycastTarget = false;
+        _label.text = "";
+        ApplyScale();
+
+        _canvas.enabled = false;
+        Plugin.Log.LogInfo("ShipBeacon canvas HUD built.");
+    }
+
+    private void ApplyScale()
+    {
+        if (_label == null)
+            return;
+        _label.fontSize = 28f * Plugin.HudScale.Value;
+    }
+
+    private void LateUpdate()
+    {
         if (Plugin.Instance == null || !Plugin.Enabled.Value)
-            return;
-
-        if (!TryGetBeacon(out var angleDeg, out var distance, out var reason))
         {
-            MaybeLogHidden(reason);
+            SetVisible(false);
             return;
         }
 
-        _lastHideReason = "";
-        EnsureStyles();
-        if (_style == null)
-            return;
+        if (_canvas == null || _label == null || _labelRt == null)
+            BuildUi();
 
-        _style.fontSize = Mathf.RoundToInt(20f * Plugin.HudScale.Value);
+        if (_labelRt != null)
+        {
+            var y = Mathf.Clamp01(Plugin.VerticalOffset.Value);
+            _labelRt.anchorMin = new Vector2(0.5f, y);
+            _labelRt.anchorMax = new Vector2(0.5f, y);
+        }
+
+        ApplyScale();
+
+        if (!TryGetBeacon(out var angleDeg, out var distance, out var reason))
+        {
+            SetVisible(false);
+            MaybeLogHidden(reason);
+            _loggedVisible = false;
+            return;
+        }
 
         var arrow = AngleToArrow(angleDeg);
-        var label = Plugin.ShowDistance.Value
+        _label!.text = Plugin.ShowDistance.Value
             ? $"{arrow}  SHIP  {distance:0}m  {arrow}"
             : $"{arrow}  SHIP  {arrow}";
 
-        var size = _style.CalcSize(new GUIContent(label));
-        var x = (Screen.width - size.x) * 0.5f;
-        var y = Screen.height * Mathf.Clamp01(Plugin.VerticalOffset.Value);
+        SetVisible(true);
 
-        GUI.depth = -1000;
-        GUI.Label(new Rect(x, y, size.x, size.y), label, _style);
+        if (!_loggedVisible)
+        {
+            _loggedVisible = true;
+            _lastHideReason = "";
+            Plugin.Log.LogInfo($"ShipBeacon visible: {distance:0}m, bearing {angleDeg:0} deg.");
+        }
+    }
+
+    private void SetVisible(bool visible)
+    {
+        if (_canvas != null && _canvas.enabled != visible)
+            _canvas.enabled = visible;
     }
 
     private void MaybeLogHidden(string reason)
@@ -92,7 +175,6 @@ internal sealed class ShipBeaconHud : MonoBehaviour
                 return false;
             }
 
-            // Only hide in orbit / company waiting room phase.
             if (start.inShipPhase)
             {
                 hideReason = "inShipPhase (orbit)";
@@ -106,7 +188,6 @@ internal sealed class ShipBeaconHud : MonoBehaviour
                 return false;
             }
 
-            // Outdoor only.
             if (player.isInsideFactory)
             {
                 hideReason = "inside factory";
@@ -137,9 +218,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
                 ? player.gameplayCamera.transform
                 : player.transform;
 
-            var from = cam.position;
-            var to = ship.position;
-            var flat = to - from;
+            var flat = ship.position - cam.position;
             flat.y = 0f;
             distance = flat.magnitude;
             if (distance < 1f)
@@ -166,7 +245,6 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         }
     }
 
-    /// <summary>ASCII-only arrows — Unity IMGUI default font often cannot draw Unicode arrows.</summary>
     private static string AngleToArrow(float signedAngleDeg)
     {
         var a = signedAngleDeg;

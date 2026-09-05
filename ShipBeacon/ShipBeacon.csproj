@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>ShipBeacon</AssemblyName>
     <RootNamespace>ShipBeacon</RootNamespace>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,14 @@
     </Reference>
     <Reference Include="Unity.Netcode.Runtime">
       <HintPath>$(PkgLethalCompany_GameLibs_Steam)/ref/netstandard2.1/Unity.Netcode.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(PkgLethalCompany_GameLibs_Steam)/ref/netstandard2.1/Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(PkgLethalCompany_GameLibs_Steam)/ref/netstandard2.1/UnityEngine.UI.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

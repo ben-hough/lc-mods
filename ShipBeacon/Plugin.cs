@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipBeacon";
     public const string ModName = "ShipBeacon";
-    public const string ModVersion = "1.0.1";
+    public const string ModVersion = "1.0.2";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -34,18 +34,13 @@ public class Plugin : BaseUnityPlugin
         VerticalOffset = Config.Bind(
             "General",
             "VerticalOffset",
-            0.18f,
-            "Vertical position on screen (0 = bottom, 1 = top). Default sits near the top-center.");
+            0.82f,
+            "Vertical anchor on screen (0 = bottom, 1 = top). Default near top-center.");
 
         _harmony.PatchAll(typeof(Plugin).Assembly);
+        ShipBeaconHud.EnsureExists();
 
-        // Ensure HUD runner exists on load.
-        var go = new GameObject("ShipBeaconHUD");
-        DontDestroyOnLoad(go);
-        go.hideFlags = HideFlags.HideAndDontSave;
-        go.AddComponent<ShipBeaconHud>();
-
-        Log.LogInfo($"{ModName} v{ModVersion} loaded.");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded (TMP canvas HUD).");
     }
 }
 
