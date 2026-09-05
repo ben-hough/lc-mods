@@ -2,24 +2,22 @@ using HarmonyLib;
 
 namespace WeedKillerRefill;
 
-[HarmonyPatch(typeof(SprayPaintItem))]
-internal static class SprayPaintItemPatches
+[HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.SetControlTipsForItem))]
+internal static class GrabbableObjectControlTipsPatch
 {
     /// <summary>
-    /// Add a vanilla top-right tip: "Refill : [R]" when holding an empty weed killer.
-    /// Tip indices: 0 Drop, 1 Spray — use 2 for refill.
+    /// SetControlTipsForItem is declared on GrabbableObject (virtual), not SprayPaintItem.
+    /// Patching SprayPaintItem makes HarmonyX throw and aborts the whole plugin Awake.
     /// </summary>
     [HarmonyPostfix]
-    [HarmonyPatch(nameof(SprayPaintItem.SetControlTipsForItem))]
-    private static void SetControlTipsForItem_Postfix(SprayPaintItem __instance)
+    private static void Postfix(GrabbableObject __instance)
     {
         if (!Plugin.ShowControlTip.Value || !Plugin.Enabled.Value)
             return;
 
-        if (!__instance.isWeedKillerSprayBottle)
+        if (__instance is not SprayPaintItem spray || !spray.isWeedKillerSprayBottle)
             return;
 
-        // Only for the item the local player is holding.
         var player = GameNetworkManager.Instance?.localPlayerController;
         if (player == null)
             return;
@@ -28,7 +26,7 @@ internal static class SprayPaintItemPatches
         if (held != __instance)
             return;
 
-        if (!WeedKillerUtil.IsEmpty(__instance))
+        if (!WeedKillerUtil.IsEmpty(spray))
             return;
 
         var hud = HUDManager.Instance;

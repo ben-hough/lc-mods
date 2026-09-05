@@ -1,3 +1,7 @@
+## 1.0.2
+- Fix crash on load: patch `GrabbableObject.SetControlTipsForItem` (not SprayPaintItem)
+- Awake continues even if Harmony tip patch fails so refill still works
+
 ## 1.0.1
 - Fix refill key not registering (use Unity Input System instead of legacy Input.GetKeyDown)
 - Prefer `currentlyHeldObject` so refill works as a client

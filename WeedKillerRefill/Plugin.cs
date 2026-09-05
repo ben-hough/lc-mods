@@ -1,3 +1,4 @@
+using System;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -11,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.1";
+    public const string ModVersion = "1.0.2";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -30,7 +31,6 @@ public class Plugin : BaseUnityPlugin
         Log = Logger;
 
         Enabled = Config.Bind("General", "Enabled", true, "Allow refilling weed killer with the configured key.");
-        // Drop is rebound to G for this user; R matches the reload metaphor. Change in config if needed.
         RefillKey = Config.Bind(
             "General",
             "RefillKey",
@@ -52,7 +52,15 @@ public class Plugin : BaseUnityPlugin
             true,
             "Show a vanilla top-right control tip (Refill : [R]) when holding an empty weed killer.");
 
-        _harmony.PatchAll(typeof(Plugin).Assembly);
+        try
+        {
+            _harmony.PatchAll(typeof(Plugin).Assembly);
+            Log.LogInfo("Harmony patches applied (control tip on GrabbableObject.SetControlTipsForItem).");
+        }
+        catch (Exception ex)
+        {
+            Log.LogWarning($"Harmony patch failed (refill keybind still works): {ex.Message}");
+        }
 
         var go = new GameObject("WeedKillerRefill");
         DontDestroyOnLoad(go);
