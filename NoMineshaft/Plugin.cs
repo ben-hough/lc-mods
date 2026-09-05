@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.NoMineshaft";
     public const string ModName = "NoMineshaft";
-    public const string ModVersion = "1.0.2";
+    public const string ModVersion = "1.0.3";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -36,6 +36,12 @@ public class Plugin : BaseUnityPlugin
         }
 
         _harmony.PatchAll(typeof(Plugin).Assembly);
+
+        Log.LogInfo($"Patch targets: GenerateNewFloor={AccessTools.Method(typeof(RoundManager), "GenerateNewFloor") != null}, " +
+                     $"LoadNewLevel={AccessTools.Method(typeof(RoundManager), "LoadNewLevel") != null}, " +
+                     $"GenerateNewLevelClientRpc={AccessTools.Method(typeof(RoundManager), "GenerateNewLevelClientRpc") != null}, " +
+                     $"ChooseNewRandomMapSeed={AccessTools.Method(typeof(StartOfRound), "ChooseNewRandomMapSeed") != null}");
+
         Log.LogInfo($"{ModName} v{ModVersion} loaded — Mineshaft interiors disabled.");
     }
 }
