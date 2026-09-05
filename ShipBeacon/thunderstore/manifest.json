@@ -1,0 +1,9 @@
+{
+  "name": "ShipBeacon",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/ben-hough/lc-ship-beacon",
+  "description": "Outdoor HUD beacon/compass pointing toward the ship.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}
