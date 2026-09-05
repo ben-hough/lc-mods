@@ -59,7 +59,10 @@ internal static class MineshaftScrubber
     {
         var start = StartOfRound.Instance;
         if (start?.levels == null)
+        {
+            Plugin.Log.LogInfo($"{context}: StartOfRound.levels is null — cannot scrub yet.");
             return;
+        }
 
         var n = 0;
         foreach (var level in start.levels)
@@ -136,7 +139,7 @@ internal static class GenerateNewFloorPatch
         try
         {
             Plugin.Log.LogInfo(
-                $"GenerateNewFloor Prefix: level={__instance.currentLevel?.name}, currentDungeonType={__instance.currentDungeonType}, isHost={__instance.IsServer}");
+                $("GenerateNewFloor Prefix: level={__instance.currentLevel?.name}, currentDungeonType={__instance.currentDungeonType}, isHost={__instance.IsServer}");
 
             MineshaftScrubber.ScrubLevel(__instance.currentLevel, "GenerateNewFloor");
             // Always attempt remap — do not return early after scrub.
@@ -180,7 +183,7 @@ internal static class GenerateNewLevelClientRpcPatch
         try
         {
             Plugin.Log.LogInfo(
-                $"GenerateNewLevelClientRpc: seed={randomSeed}, levelID={levelID}, currentDungeonType={__instance.currentDungeonType}");
+                $("GenerateNewLevelClientRpc: seed={randomSeed}, levelID={levelID}, currentDungeonType={__instance.currentDungeonType}");
 
             // Scrub before local generation mirrors host decision as closely as possible.
             MineshaftScrubber.ScrubLevel(__instance.currentLevel, "GenerateNewLevelClientRpc");

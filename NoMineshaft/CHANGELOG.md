@@ -1,3 +1,7 @@
+## 1.0.4
+- VerboseLogging + DungeonTypeWatcher heartbeat (logs currentDungeonType)
+- Log when StartOfRound.levels is null instead of silent return
+
 ## 1.0.3
 - Scrub Mineshaft from all moons on StartOfRound
 - Fix early-return that skipped currentDungeonType remap
