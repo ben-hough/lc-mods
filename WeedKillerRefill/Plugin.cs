@@ -1,6 +1,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
 using UnityEngine;
 
 namespace WeedKillerRefill;
@@ -10,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.1";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -18,8 +19,10 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<bool> Enabled { get; private set; } = null!;
     internal static ConfigEntry<KeyCode> RefillKey { get; private set; } = null!;
     internal static ConfigEntry<float> EmptyThreshold { get; private set; } = null!;
-    internal static ConfigEntry<bool> ShowHint { get; private set; } = null!;
+    internal static ConfigEntry<bool> ShowControlTip { get; private set; } = null!;
     internal static ConfigEntry<bool> OnlyWhenEmpty { get; private set; } = null!;
+
+    private readonly Harmony _harmony = new(ModGuid);
 
     private void Awake()
     {
@@ -27,27 +30,29 @@ public class Plugin : BaseUnityPlugin
         Log = Logger;
 
         Enabled = Config.Bind("General", "Enabled", true, "Allow refilling weed killer with the configured key.");
-        // Q is usually Drop in Lethal Company; R matches the game's ReloadBatteries / reload metaphor.
+        // Drop is rebound to G for this user; R matches the reload metaphor. Change in config if needed.
         RefillKey = Config.Bind(
             "General",
             "RefillKey",
             KeyCode.R,
-            "Key to refill a held weed killer. Default R (reload). Q is typically Drop — change here if you want.");
+            "Key to refill a held weed killer. Uses the Unity Input System (works in Lethal Company).");
         EmptyThreshold = Config.Bind(
             "General",
             "EmptyThreshold",
-            0.02f,
-            "Tank charge at or below this counts as empty (0–1).");
+            0.05f,
+            "Tank/battery charge at or below this counts as empty (0–1).");
         OnlyWhenEmpty = Config.Bind(
             "General",
             "OnlyWhenEmpty",
             true,
-            "If true, refill only works when the tank is empty. If false, always tops off on key press.");
-        ShowHint = Config.Bind(
+            "If true, refill only works when empty. If false, always tops off on key press.");
+        ShowControlTip = Config.Bind(
             "General",
-            "ShowHint",
+            "ShowControlTip",
             true,
-            "Show an on-screen hint when holding an empty weed killer.");
+            "Show a vanilla top-right control tip (Refill : [R]) when holding an empty weed killer.");
+
+        _harmony.PatchAll(typeof(Plugin).Assembly);
 
         var go = new GameObject("WeedKillerRefill");
         DontDestroyOnLoad(go);
