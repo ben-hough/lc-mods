@@ -17,7 +17,7 @@ Hidden while you are inside the facility or in the ship hangar.
 | `Enabled` | `true` | Toggle the HUD |
 | `ShowDistance` | `true` | Show meters to ship |
 | `HudScale` | `1.0` | Text scale |
-| `VerticalOffset` | `0.12` | Vertical placement (0 = top, 1 = bottom) |
+| `VerticalOffset` | `0.12` | Vertical placement (higher = closer to top) |
 
 ## Build
 
