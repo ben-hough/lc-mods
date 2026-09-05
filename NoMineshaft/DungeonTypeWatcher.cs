@@ -29,7 +29,7 @@ internal sealed class DungeonTypeWatcher : MonoBehaviour
         if (rm.currentDungeonType != _lastType)
         {
             Plugin.Log.LogInfo(
-                $("[Watcher] currentDungeonType changed {_lastType} -> {rm.currentDungeonType} " +
+                $"[Watcher] currentDungeonType changed {_lastType} -> {rm.currentDungeonType} " +
                 $"(mineshaft={rm.currentDungeonType == 4}) level={rm.currentLevel?.name} " +
                 $"inShipPhase={start?.inShipPhase} isServer={rm.IsServer}");
             _lastType = rm.currentDungeonType;
@@ -37,7 +37,7 @@ internal sealed class DungeonTypeWatcher : MonoBehaviour
         else
         {
             Plugin.V(
-                $("[Watcher] currentDungeonType={rm.currentDungeonType} level={rm.currentLevel?.name} " +
+                $"[Watcher] currentDungeonType={rm.currentDungeonType} level={rm.currentLevel?.name} " +
                 $"inShipPhase={start?.inShipPhase} isServer={rm.IsServer}");
         }
     }
