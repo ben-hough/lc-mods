@@ -1,12 +1,8 @@
-# Changelog
+## 1.0.2
+- Fix Mineshaft removal for v81: always treat interior id 4 as Mineshaft (plus Level3Flow name scan)
+- Strip on GenerateNewFloor, ChooseNewRandomMapSeed, and LoadNewLevel
+- Remap `currentDungeonType` if Mineshaft was already selected before generation
+- Info-level logs so BepInEx console shows strip/reroll activity
 
 ## 1.0.1
-
-- Resolve Mineshaft by DunGen flow name `Level3Flow` (fallback id 4)
-- Switch compile references to `LethalCompany.GameLibs.Steam` 81.0.5-ngd.0
-
-## 1.0.0
-
-- Initial release: removes Mineshaft interiors from dungeon flow rotation
-- Config toggle `General.Enabled`
-- Seed reroll fallback when a rolled seed still predicts Mineshaft
+- Initial public build for Lethal Company v81 GameLibs
