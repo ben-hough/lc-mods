@@ -48,7 +48,7 @@ internal sealed class DungeonTypeWatcher : MonoBehaviour
         if (rm.currentDungeonType != _lastType)
         {
             Plugin.Log.LogInfo(
-                $"[Watcher] currentDungeonType {_lastType} -> {rm.currentDungeonType} " +
+                $("[Watcher] currentDungeonType {_lastType} -> {rm.currentDungeonType} " +
                 $"(mineshaft={rm.currentDungeonType == 4}) level={rm.currentLevel?.name} " +
                 $"inShipPhase={start?.inShipPhase} isServer={rm.IsServer} generating={rm.dungeonIsGenerating}");
             _lastType = rm.currentDungeonType;
@@ -62,7 +62,7 @@ internal sealed class DungeonTypeWatcher : MonoBehaviour
         else
         {
             Plugin.Log.LogInfo(
-                $"[Watcher] tick type={rm.currentDungeonType} level={rm.currentLevel?.name} " +
+                $("[Watcher] tick type={rm.currentDungeonType} level={rm.currentLevel?.name} " +
                 $"inShipPhase={start?.inShipPhase} isServer={rm.IsServer} generating={rm.dungeonIsGenerating}");
         }
     }
