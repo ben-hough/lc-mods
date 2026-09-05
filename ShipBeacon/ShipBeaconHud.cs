@@ -109,7 +109,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             var start = StartOfRound.Instance;
             var player = GameNetworkManager.Instance?.localPlayerController;
             Plugin.Log.LogInfo(
-                $("[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
+                $"[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
                 $"inShipPhase={start?.inShipPhase}, playerNull={player == null}, dead={player?.isPlayerDead}, " +
                 $"insideFactory={player?.isInsideFactory}, inShip={player?.isInHangarShipRoom}");
         }
