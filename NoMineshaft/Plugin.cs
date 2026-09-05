@@ -1,3 +1,4 @@
+using System;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -11,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.NoMineshaft";
     public const string ModName = "NoMineshaft";
-    public const string ModVersion = "1.0.4";
+    public const string ModVersion = "1.0.5";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -25,17 +26,10 @@ public class Plugin : BaseUnityPlugin
         Instance = this;
         Log = Logger;
 
-        Enabled = Config.Bind(
-            "General",
-            "Enabled",
-            true,
+        Enabled = Config.Bind("General", "Enabled", true,
             "When true, Mineshaft interiors are removed from dungeon rotation.");
-
-        Verbose = Config.Bind(
-            "General",
-            "VerboseLogging",
-            true,
-            "Extra Info logs for dungeon scrub/remap/RPC (debugging).");
+        Verbose = Config.Bind("General", "VerboseLogging", true,
+            "Extra Info logs for dungeon scrub/remap/DunGen (debugging).");
 
         if (!Enabled.Value)
         {
@@ -43,19 +37,10 @@ public class Plugin : BaseUnityPlugin
             return;
         }
 
-        _harmony.PatchAll(typeof(Plugin).Assembly);
+        ManualPatches.Apply(_harmony);
+        DungeonTypeWatcher.EnsureExists();
 
-        var genFloor = AccessTools.Method(typeof(RoundManager), "GenerateNewFloor") != null;
-        var loadLevel = AccessTools.Method(typeof(RoundManager), "LoadNewLevel") != null;
-        var clientRpc = AccessTools.Method(typeof(RoundManager), "GenerateNewLevelClientRpc") != null;
-        var mapSeed = AccessTools.Method(typeof(StartOfRound), "ChooseNewRandomMapSeed") != null;
-        Log.LogInfo($"Patch targets: GenerateNewFloor={genFloor}, LoadNewLevel={loadLevel}, GenerateNewLevelClientRpc={clientRpc}, ChooseNewRandomMapSeed={mapSeed}");
-
-        var go = new GameObject("NoMineshaftWatcher");
-        Object.DontDestroyOnLoad(go);
-        go.AddComponent<DungeonTypeWatcher>();
-
-        Log.LogInfo($"{ModName} v{ModVersion} loaded — Mineshaft interiors disabled. Verbose={Verbose.Value}");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded. Verbose={Verbose.Value}");
     }
 
     internal static void V(string msg)

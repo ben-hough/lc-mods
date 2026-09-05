@@ -1,3 +1,8 @@
+## 1.0.5
+- Intercept DunGen DungeonGenerator.Generate and swap Mineshaft flow (works on client+host)
+- Manual Harmony patches (same approach as door mod)
+- Persistent [Watcher] recreated on StartOfRound, Info heartbeat every 5s
+
 ## 1.0.4
 - VerboseLogging + DungeonTypeWatcher heartbeat (logs currentDungeonType)
 - Log when StartOfRound.levels is null instead of silent return
