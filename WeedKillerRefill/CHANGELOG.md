@@ -1,3 +1,8 @@
+## 1.0.3
+- Fix refill key: remove HideAndDontSave (blocked Update)
+- Also bind refill to local PlayerControllerB.Update
+- Edge-detect Input System key press + verbose holding logs
+
 ## 1.0.2
 - Fix crash on load: patch `GrabbableObject.SetControlTipsForItem` (not SprayPaintItem)
 - Awake continues even if Harmony tip patch fails so refill still works

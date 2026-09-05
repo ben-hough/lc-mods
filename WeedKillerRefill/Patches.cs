@@ -37,3 +37,17 @@ internal static class GrabbableObjectControlTipsPatch
         hud.ChangeControlTip(2, $"Refill : [{key}]");
     }
 }
+
+
+[HarmonyPatch(typeof(GameNetcodeStuff.PlayerControllerB), "Update")]
+internal static class PlayerUpdateRefillPatch
+{
+    private static void Postfix(GameNetcodeStuff.PlayerControllerB __instance)
+    {
+        // Local player only.
+        if (__instance != GameNetworkManager.Instance?.localPlayerController)
+            return;
+
+        RefillController.Tick("Player.Update");
+    }
+}

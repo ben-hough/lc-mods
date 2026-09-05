@@ -35,24 +35,43 @@ internal static class InputUtil
         { KeyCode.F9, Key.F9 }, { KeyCode.F10, Key.F10 }, { KeyCode.F11, Key.F11 }, { KeyCode.F12, Key.F12 },
     };
 
-    /// <summary>
-    /// Lethal Company uses the Input System package; legacy Input.GetKeyDown is often a no-op.
-    /// Fall back to legacy for older setups.
-    /// </summary>
+    private static bool _wasDown;
+
     public static bool WasPressedThisFrame(KeyCode keyCode)
     {
-        var keyboard = Keyboard.current;
-        if (keyboard != null && KeyMap.TryGetValue(keyCode, out var key))
-        {
-            KeyControl control = keyboard[key];
-            if (control != null && control.wasPressedThisFrame)
-                return true;
-        }
+        var down = IsDown(keyCode);
+        var pressed = down && !_wasDown;
+        _wasDown = down;
+        return pressed;
+    }
 
-        // Legacy fallback (Active Input Handling = Both)
+    public static bool IsDown(KeyCode keyCode)
+    {
         try
         {
-            if (Input.GetKeyDown(keyCode))
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
+            {
+                // Direct R key is the common case.
+                if (keyCode == KeyCode.R && keyboard.rKey.isPressed)
+                    return true;
+
+                if (KeyMap.TryGetValue(keyCode, out var key))
+                {
+                    KeyControl control = keyboard[key];
+                    if (control != null && control.isPressed)
+                        return true;
+                }
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            if (Input.GetKey(keyCode))
                 return true;
         }
         catch

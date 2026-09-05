@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.2";
+    public const string ModVersion = "1.0.3";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -22,6 +22,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> EmptyThreshold { get; private set; } = null!;
     internal static ConfigEntry<bool> ShowControlTip { get; private set; } = null!;
     internal static ConfigEntry<bool> OnlyWhenEmpty { get; private set; } = null!;
+    internal static ConfigEntry<bool> Verbose { get; private set; } = null!;
 
     private readonly Harmony _harmony = new(ModGuid);
 
@@ -35,7 +36,7 @@ public class Plugin : BaseUnityPlugin
             "General",
             "RefillKey",
             KeyCode.R,
-            "Key to refill a held weed killer. Uses the Unity Input System (works in Lethal Company).");
+            "Key to refill a held weed killer.");
         EmptyThreshold = Config.Bind(
             "General",
             "EmptyThreshold",
@@ -51,23 +52,34 @@ public class Plugin : BaseUnityPlugin
             "ShowControlTip",
             true,
             "Show a vanilla top-right control tip (Refill : [R]) when holding an empty weed killer.");
+        Verbose = Config.Bind(
+            "General",
+            "VerboseLogging",
+            true,
+            "Log holding/key/refill traces.");
 
         try
         {
             _harmony.PatchAll(typeof(Plugin).Assembly);
-            Log.LogInfo("Harmony patches applied (control tip on GrabbableObject.SetControlTipsForItem).");
+            Log.LogInfo("Harmony patches applied (control tip + player Update keybind).");
         }
         catch (Exception ex)
         {
-            Log.LogWarning($"Harmony patch failed (refill keybind still works): {ex.Message}");
+            Log.LogWarning($"Harmony patch failed: {ex.Message}");
         }
 
+        // Backup runner — do NOT use HideAndDontSave (blocks Update in LC).
         var go = new GameObject("WeedKillerRefill");
         DontDestroyOnLoad(go);
-        go.hideFlags = HideFlags.HideAndDontSave;
         go.AddComponent<WeedKillerRefillBehaviour>();
 
         Log.LogInfo($"{ModName} v{ModVersion} loaded. Refill key: {RefillKey.Value}");
+    }
+
+    internal static void V(string msg)
+    {
+        if (Verbose != null && Verbose.Value)
+            Log.LogInfo(msg);
     }
 }
 
