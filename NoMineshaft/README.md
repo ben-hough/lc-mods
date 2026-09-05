@@ -32,7 +32,7 @@ dotnet build -c Release
 
 Output: `bin/Release/netstandard2.1/NoMineshaft.dll`
 
-References stripped/publicized game assemblies via [LethalAPI.GameLibs](https://www.nuget.org/packages/LethalAPI.GameLibs) (no local game install required to compile).
+References stripped/publicized game assemblies via [LethalCompany.GameLibs.Steam](https://www.nuget.org/packages/LethalCompany.GameLibs.Steam) (no local game install required to compile). Mineshaft is resolved by DunGen flow name `Level3Flow`, with vanilla id `4` as fallback.
 
 ## Thunderstore packaging
 

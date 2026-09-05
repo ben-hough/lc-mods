@@ -5,17 +5,6 @@ using HarmonyLib;
 namespace NoMineshaft.Patches;
 
 /// <summary>
-/// Vanilla interior flow IDs used by SelectableLevel.dungeonFlowTypes.
-/// Mineshaft was added as id 4.
-/// </summary>
-internal enum InteriorType
-{
-    Factory = 0,
-    Manor = 1,
-    Mineshaft = 4,
-}
-
-/// <summary>
 /// Strip Mineshaft from the current moon's dungeon flow weights before floor generation.
 /// Host-side; clients follow host generation.
 /// </summary>
@@ -33,8 +22,9 @@ internal static class GenerateNewFloorPatch
             if (level?.dungeonFlowTypes == null || level.dungeonFlowTypes.Length == 0)
                 return;
 
+            var mineshaftId = MineshaftId.Resolve(__instance);
             var filtered = level.dungeonFlowTypes
-                .Where(flow => flow.id != (int)InteriorType.Mineshaft)
+                .Where(flow => flow.id != mineshaftId)
                 .ToArray();
 
             if (filtered.Length == level.dungeonFlowTypes.Length)
@@ -48,7 +38,8 @@ internal static class GenerateNewFloorPatch
             }
 
             level.dungeonFlowTypes = filtered;
-            Plugin.Log.LogDebug($"Removed Mineshaft from dungeon flows on {level.name}.");
+            Plugin.Log.LogDebug(
+                $"Removed Mineshaft (id {mineshaftId}) from dungeon flows on {level.name}.");
         }
         catch (Exception ex)
         {
@@ -83,9 +74,10 @@ internal static class ChooseNewRandomMapSeedPatch
             if (flows.Length == 0)
                 return;
 
-            // Ensure Mineshaft is already filtered when possible.
+            var mineshaftId = MineshaftId.Resolve(manager);
+
             var withoutMineshaft = flows
-                .Where(flow => flow.id != (int)InteriorType.Mineshaft)
+                .Where(flow => flow.id != mineshaftId)
                 .ToArray();
             if (withoutMineshaft.Length > 0 && withoutMineshaft.Length != flows.Length)
             {
@@ -93,10 +85,10 @@ internal static class ChooseNewRandomMapSeedPatch
                 flows = withoutMineshaft;
             }
 
-            if (flows.All(flow => flow.id != (int)InteriorType.Mineshaft))
+            if (flows.All(flow => flow.id != mineshaftId))
                 return;
 
-            if (PredictInterior(__instance.randomMapSeed, manager) != InteriorType.Mineshaft)
+            if (PredictInteriorId(__instance.randomMapSeed, manager) != mineshaftId)
                 return;
 
             manager.hasInitializedLevelRandomSeed = false;
@@ -105,8 +97,8 @@ internal static class ChooseNewRandomMapSeedPatch
             for (var i = 0; i < MaxAttempts; i++)
             {
                 var candidate = Rng.Next(1, MaxSeed);
-                var predicted = PredictInterior(candidate, manager);
-                if (predicted is null or InteriorType.Mineshaft)
+                var predicted = PredictInteriorId(candidate, manager);
+                if (predicted is null || predicted == mineshaftId)
                     continue;
 
                 __instance.randomMapSeed = candidate;
@@ -123,7 +115,7 @@ internal static class ChooseNewRandomMapSeedPatch
         }
     }
 
-    private static InteriorType? PredictInterior(int seed, RoundManager manager)
+    private static int? PredictInteriorId(int seed, RoundManager manager)
     {
         var flows = manager.currentLevel.dungeonFlowTypes;
         if (flows == null || flows.Length == 0)
@@ -135,7 +127,49 @@ internal static class ChooseNewRandomMapSeedPatch
         if (index < 0 || index >= flows.Length)
             return null;
 
-        var id = flows[index].id;
-        return Enum.IsDefined(typeof(InteriorType), id) ? (InteriorType)id : null;
+        return flows[index].id;
+    }
+}
+
+/// <summary>
+/// Resolves Mineshaft's flow catalog id by DunGen asset name, with vanilla id fallback.
+/// </summary>
+internal static class MineshaftId
+{
+    private const string MineshaftFlowName = "Level3Flow";
+    private const int VanillaFallbackId = 4;
+
+    private static int? _cachedId;
+
+    internal static int Resolve(RoundManager manager)
+    {
+        if (_cachedId.HasValue)
+            return _cachedId.Value;
+
+        try
+        {
+            var flows = manager?.dungeonFlowTypes;
+            if (flows != null)
+            {
+                for (var i = 0; i < flows.Length; i++)
+                {
+                    var flow = flows[i]?.dungeonFlow;
+                    if (flow != null && flow.name == MineshaftFlowName)
+                    {
+                        _cachedId = i;
+                        Plugin.Log.LogDebug($"Resolved Mineshaft as {MineshaftFlowName} (id {i}).");
+                        return i;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogDebug($"Mineshaft id name lookup failed, using fallback: {ex.Message}");
+        }
+
+        Plugin.Log.LogDebug($"Using Mineshaft fallback id {VanillaFallbackId}.");
+        _cachedId = VanillaFallbackId;
+        return VanillaFallbackId;
     }
 }
