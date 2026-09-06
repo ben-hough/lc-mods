@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipBeacon";
     public const string ModName = "ShipBeacon";
-    public const string ModVersion = "1.0.3";
+    public const string ModVersion = "1.0.10";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -20,6 +20,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<bool> ShowDistance { get; private set; } = null!;
     internal static ConfigEntry<float> HudScale { get; private set; } = null!;
     internal static ConfigEntry<float> VerticalOffset { get; private set; } = null!;
+    internal static ConfigEntry<bool> MatchClockStyle { get; private set; } = null!;
 
     private readonly Harmony _harmony = new(ModGuid);
 
@@ -34,13 +35,18 @@ public class Plugin : BaseUnityPlugin
         VerticalOffset = Config.Bind(
             "General",
             "VerticalOffset",
-            0.82f,
-            "Vertical anchor on screen (0 = bottom, 1 = top). Default near top-center.");
+            0.90f,
+            "Vertical anchor on screen (0 = bottom, 1 = top). Default just under the top clock.");
+        MatchClockStyle = Config.Bind(
+            "General",
+            "MatchClockStyle",
+            true,
+            "Use the orange clock HUD color/font when available.");
 
         _harmony.PatchAll(typeof(Plugin).Assembly);
         ShipBeaconHud.EnsureExists();
 
-        Log.LogInfo($"{ModName} v{ModVersion} loaded (TMP canvas HUD).");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded (top orange HUD style).");
     }
 }
 
