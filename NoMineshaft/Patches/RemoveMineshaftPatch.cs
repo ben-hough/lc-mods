@@ -170,6 +170,12 @@ internal static class ManualPatches
         try
         {
             Patch(typeof(RoundManager), "GenerateNewFloor", typeof(GenFloorPatch), nameof(GenFloorPatch.Prefix));
+            var genFloor = AccessTools.Method(typeof(RoundManager), "GenerateNewFloor");
+            if (genFloor != null)
+            {
+                harmony.Patch(genFloor, postfix: new HarmonyMethod(typeof(GenFloorPostfixPatch), nameof(GenFloorPostfixPatch.Postfix)));
+                Plugin.Log.LogInfo("Patched RoundManager.GenerateNewFloor postfix");
+            }
             Patch(typeof(RoundManager), "LoadNewLevel", typeof(LoadLevelPatch), nameof(LoadLevelPatch.Prefix));
             Patch(typeof(RoundManager), "GenerateNewLevelClientRpc", typeof(ClientRpcPatch), nameof(ClientRpcPatch.Prefix));
             var seed = AccessTools.Method(typeof(StartOfRound), "ChooseNewRandomMapSeed");
@@ -209,7 +215,7 @@ internal static class GenFloorPatch
 {
     public static void Prefix(RoundManager __instance)
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
         try
         {
             Plugin.Log.LogInfo($"[GenerateNewFloor] level={__instance.currentLevel?.name} type={__instance.currentDungeonType} isServer={__instance.IsServer}");
@@ -224,7 +230,7 @@ internal static class LoadLevelPatch
 {
     public static void Prefix(RoundManager __instance, int randomSeed, SelectableLevel newLevel)
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
         try
         {
             Plugin.Log.LogInfo($"[LoadNewLevel] seed={randomSeed} level={newLevel?.name}");
@@ -238,7 +244,7 @@ internal static class ClientRpcPatch
 {
     public static void Prefix(RoundManager __instance, int randomSeed, int levelID)
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
         try
         {
             Plugin.Log.LogInfo($"[GenerateNewLevelClientRpc] seed={randomSeed} levelID={levelID} type={__instance.currentDungeonType}");
@@ -255,7 +261,7 @@ internal static class MapSeedPatch
 
     public static void Postfix(StartOfRound __instance)
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
         try
         {
             var manager = RoundManager.Instance;
@@ -312,7 +318,7 @@ internal static class StartPatch
 {
     public static void Postfix()
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
         Plugin.Log.LogInfo("[StartOfRound.Start] ensuring watcher + scrubbing moons");
         DungeonTypeWatcher.EnsureExists();
         try { MineshaftScrubber.ScrubAllLevels("StartOfRound.Start"); }
@@ -324,7 +330,7 @@ internal static class DunGenPatch
 {
     public static void Prefix(DungeonGenerator __instance)
     {
-        if (Plugin.Instance == null || !Plugin.Enabled.Value) return;
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
 
         try
         {
@@ -358,5 +364,36 @@ internal static class DunGenPatch
         {
             Plugin.Log.LogWarning($"[DunGen.Generate] {ex}");
         }
+    }
+}
+
+/// <summary>After vanilla picks dungeon type — last chance before DunGen runs.</summary>
+internal static class GenFloorPostfixPatch
+{
+    public static void Postfix(RoundManager __instance)
+    {
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        try
+        {
+            Plugin.Log.LogInfo($"[GenerateNewFloor.Post] type={__instance.currentDungeonType} level={__instance.currentLevel?.name} isServer={__instance.IsServer}");
+            if (!MineshaftIds.IsMineshaftId(__instance.currentDungeonType))
+                return;
+
+            MineshaftScrubber.RemapDungeonType(__instance, "GenerateNewFloor.Post");
+            var alt = MineshaftScrubber.PickAlternateFlow(__instance, out var newId);
+            if (alt == null)
+            {
+                Plugin.Log.LogWarning("[GenerateNewFloor.Post] still Mineshaft, no alternate flow");
+                return;
+            }
+
+            __instance.currentDungeonType = newId;
+            if (__instance.dungeonGenerator?.Generator != null)
+            {
+                __instance.dungeonGenerator.Generator.DungeonFlow = alt;
+                Plugin.Log.LogInfo($"[GenerateNewFloor.Post] forced DungeonFlow={alt.name} id={newId}");
+            }
+        }
+        catch (Exception ex) { Plugin.Log.LogWarning($"[GenerateNewFloor.Post] {ex.Message}"); }
     }
 }
