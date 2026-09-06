@@ -36,13 +36,63 @@ internal static class InputUtil
     };
 
     private static bool _wasDown;
+    private static int _edgeFrame = -1;
+    private static bool _edgeResult;
 
     public static bool WasPressedThisFrame(KeyCode keyCode)
     {
+        // Cache per frame so tip + LateUpdate callers see the same edge.
+        var frame = Time.frameCount;
+        if (frame == _edgeFrame)
+            return _edgeResult;
+
+        _edgeFrame = frame;
+
+        // Prefer Input System's own edge detect when available.
+        try
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard != null && keyCode == KeyCode.R && keyboard.rKey.wasPressedThisFrame)
+            {
+                _edgeResult = true;
+                _wasDown = true;
+                return true;
+            }
+
+            if (keyboard != null && KeyMap.TryGetValue(keyCode, out var key))
+            {
+                KeyControl control = keyboard[key];
+                if (control != null && control.wasPressedThisFrame)
+                {
+                    _edgeResult = true;
+                    _wasDown = true;
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            // fall through
+        }
+
+        try
+        {
+            if (Input.GetKeyDown(keyCode))
+            {
+                _edgeResult = true;
+                _wasDown = true;
+                return true;
+            }
+        }
+        catch
+        {
+            // fall through
+        }
+
         var down = IsDown(keyCode);
-        var pressed = down && !_wasDown;
+        _edgeResult = down && !_wasDown;
         _wasDown = down;
-        return pressed;
+        return _edgeResult;
     }
 
     public static bool IsDown(KeyCode keyCode)
@@ -52,7 +102,6 @@ internal static class InputUtil
             var keyboard = Keyboard.current;
             if (keyboard != null)
             {
-                // Direct R key is the common case.
                 if (keyCode == KeyCode.R && keyboard.rKey.isPressed)
                     return true;
 

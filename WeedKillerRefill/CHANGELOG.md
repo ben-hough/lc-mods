@@ -1,18 +1,9 @@
-## 1.0.3
-- Fix refill key: remove HideAndDontSave (blocked Update)
-- Also bind refill to local PlayerControllerB.Update
-- Edge-detect Input System key press + verbose holding logs
+# Changelog
 
-## 1.0.2
-- Fix crash on load: patch `GrabbableObject.SetControlTipsForItem` (not SprayPaintItem)
-- Awake continues even if Harmony tip patch fails so refill still works
+## 1.0.6
+- Primary Q-shake refill via `ItemInteractLeftRight` (vanilla skips shake on weed killer)
+- Optional R key
+- `ChargeBatteries` tank sync + Instance fix
 
-## 1.0.1
-- Fix refill key not registering (use Unity Input System instead of legacy Input.GetKeyDown)
-- Prefer `currentlyHeldObject` so refill works as a client
-- Refill both `sprayCanTank` and battery, then `SyncBatteryServerRpc`
-- Add vanilla top-right control tip: `Refill : [R]` when empty
-- Log when holding empty / pressing refill for easier debugging
-
-## 1.0.0
-- Initial release: refill empty weed killer with configurable key (default R)
+## 1.0.2 – 1.0.5
+- Harmony tip-method crash fix, keybind iterations, earlier refill paths
