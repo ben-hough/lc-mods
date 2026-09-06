@@ -1,9 +1,7 @@
-using System;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
 
 namespace ShipDoorTerminal;
 
@@ -12,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipDoorTerminal";
     public const string ModName = "ShipDoorTerminal";
-    public const string ModVersion = "1.0.2";
+    public const string ModVersion = "1.0.10";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -29,10 +27,9 @@ public class Plugin : BaseUnityPlugin
         Enabled = Config.Bind("General", "Enabled", true,
             "Enable terminal commands: door / doors / opendoor / closedoor.");
         Verbose = Config.Bind("General", "VerboseLogging", true,
-            "Log every terminal submit/parse/word attempt (noisy, for debugging).");
+            "Log terminal/door traces.");
 
         ManualPatches.Apply(_harmony);
-
         Log.LogInfo($"{ModName} v{ModVersion} loaded. Verbose={Verbose.Value}");
     }
 

@@ -1,11 +1,20 @@
-## 1.0.2
-- Manually Harmony-patch ParseWord / OnSubmit / ParsePlayerSentence (PatchAll was not firing)
-- Intercept ParseWord where vanilla logs "Could not parse word"
-- VerboseLogging config (default on) for submit/parse/word traces
-- Accept dooropen / doorclose aliases
+# Changelog
 
-## 1.0.1
-- Attempted OnSubmit capture + keyword registration
+## 1.0.10
+- Inject `>DOOR` only into real command-list pages (`>STORE` + catalog entries)
+- Strip leftover DOOR docs from welcome / first-boot tip pages
+- Also targets `help` / `other` keyword result nodes when they are catalogs
 
-## 1.0.0
-- Initial release
+## 1.0.9
+- Removed `[ShipDoorTerminal]` header; DOOR sits in the main list like vanilla commands
+
+## 1.0.8
+- Blank-line spacing after OTHER
+- Refuse door commands while in orbit
+
+## 1.0.7
+- Fixed blank Enter after door commands
+- Added DOOR / OPENDOOR / CLOSEDOOR docs on help pages
+
+## 1.0.6 and earlier
+- Hangar Start/Stop button presses, keyword registration, Instance fix
