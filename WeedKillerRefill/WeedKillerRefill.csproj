@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>WeedKillerRefill</AssemblyName>
     <RootNamespace>WeedKillerRefill</RootNamespace>
-    <Version>1.0.3</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.3";
+    public const string ModVersion = "1.0.6";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -23,6 +23,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<bool> ShowControlTip { get; private set; } = null!;
     internal static ConfigEntry<bool> OnlyWhenEmpty { get; private set; } = null!;
     internal static ConfigEntry<bool> Verbose { get; private set; } = null!;
+    internal static ConfigEntry<bool> AllowKeyRefill { get; private set; } = null!;
 
     private readonly Harmony _harmony = new(ModGuid);
 
@@ -57,23 +58,25 @@ public class Plugin : BaseUnityPlugin
             "VerboseLogging",
             true,
             "Log holding/key/refill traces.");
+        AllowKeyRefill = Config.Bind(
+            "General",
+            "AllowKeyRefill",
+            true,
+            "Also allow the RefillKey (default R) in addition to Q-shake refill.");
 
         try
         {
             _harmony.PatchAll(typeof(Plugin).Assembly);
-            Log.LogInfo("Harmony patches applied (control tip + player Update keybind).");
+            Log.LogInfo("Harmony patches applied (Q-shake refill + optional key + ChargeBatteries sync).");
         }
         catch (Exception ex)
         {
             Log.LogWarning($"Harmony patch failed: {ex.Message}");
         }
 
-        // Backup runner — do NOT use HideAndDontSave (blocks Update in LC).
-        var go = new GameObject("WeedKillerRefill");
-        DontDestroyOnLoad(go);
-        go.AddComponent<WeedKillerRefillBehaviour>();
+        WeedKillerRefillBehaviour.EnsureExists();
 
-        Log.LogInfo($"{ModName} v{ModVersion} loaded. Refill key: {RefillKey.Value}");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded. Shake Q to refill (also key: {RefillKey.Value}).");
     }
 
     internal static void V(string msg)

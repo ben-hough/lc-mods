@@ -1,8 +1,8 @@
 {
   "name": "WeedKillerRefill",
-  "version_number": "1.0.1",
+  "version_number": "1.0.6",
   "website_url": "https://github.com/ben-hough/lc-weed-killer-refill",
-  "description": "Refill an empty weed killer can with a key press (default R).",
+  "description": "Refill weed killer by shaking (Q) or optional R key; syncs tank charge.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]

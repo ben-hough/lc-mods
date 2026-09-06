@@ -15,7 +15,6 @@ internal static class WeedKillerUtil
             if (player == null || player.isPlayerDead)
                 return false;
 
-            // Prefer client-local held object; server field can lag / be wrong on clients.
             GrabbableObject? held = player.currentlyHeldObject;
             if (held == null)
                 held = player.currentlyHeldObjectServer;
@@ -35,6 +34,16 @@ internal static class WeedKillerUtil
         }
     }
 
+    public static bool IsHeldByLocalPlayer(SprayPaintItem spray)
+    {
+        var player = GameNetworkManager.Instance?.localPlayerController;
+        if (player == null || spray == null)
+            return false;
+
+        var held = player.currentlyHeldObject ?? player.currentlyHeldObjectServer;
+        return held == spray || spray.playerHeldBy == player;
+    }
+
     public static bool IsEmpty(SprayPaintItem spray)
     {
         var threshold = Plugin.EmptyThreshold.Value;
@@ -46,7 +55,7 @@ internal static class WeedKillerUtil
         try
         {
             var bat = spray.insertedBattery;
-            if (bat.empty || bat.charge <= threshold)
+            if (bat != null && (bat.empty || bat.charge <= threshold))
                 return true;
         }
         catch
@@ -57,18 +66,35 @@ internal static class WeedKillerUtil
         return false;
     }
 
-    public static void Refill(SprayPaintItem spray)
+    /// <summary>
+    /// Full tank + shake meter restore. Mirrors what paint-can shaking does to
+    /// sprayCanShakeMeter, plus fills sprayCanTank (weed killer has no vanilla shake refill).
+    /// </summary>
+    public static void Refill(SprayPaintItem spray, string source)
     {
         spray.sprayCanTank = 1f;
+        spray.sprayCanShakeMeter = 1f;
         spray.tryingToUseEmptyCan = false;
-        spray.sprayCanShakeMeter = 0f;
+
+        try
+        {
+            if (spray.sprayCanNeedsShakingParticle != null && spray.sprayCanNeedsShakingParticle.isPlaying)
+                spray.sprayCanNeedsShakingParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        catch
+        {
+            // optional
+        }
 
         try
         {
             var bat = spray.insertedBattery;
-            bat.charge = 1f;
-            bat.empty = false;
-            spray.insertedBattery = bat;
+            if (bat != null)
+            {
+                bat.charge = 1f;
+                bat.empty = false;
+                spray.insertedBattery = bat;
+            }
         }
         catch (Exception ex)
         {
@@ -77,8 +103,8 @@ internal static class WeedKillerUtil
 
         try
         {
-            // Keep HUD / networked battery in sync (works for local owner).
-            spray.SyncBatteryServerRpc(100);
+            if (spray.itemProperties != null && spray.itemProperties.requiresBattery)
+                spray.SyncBatteryServerRpc(100);
         }
         catch (Exception ex)
         {
@@ -91,13 +117,42 @@ internal static class WeedKillerUtil
         }
         catch
         {
-            // optional
+            // optional — ChargeBatteries is how WeedKillerAdjuster links charger → tank
         }
 
-        // Refresh tips so Spray tip returns and Refill tip clears.
         try
         {
             spray.SetControlTipsForItem();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        Plugin.Log.LogInfo(
+            $"[{source}] Refilled: tank={spray.sprayCanTank:0.###} shake={spray.sprayCanShakeMeter:0.###} tryingEmpty={spray.tryingToUseEmptyCan}");
+    }
+
+    public static void PlayShakeFeedback(SprayPaintItem spray)
+    {
+        try
+        {
+            if (spray.playerHeldBy != null)
+                spray.playerHeldBy.playerBodyAnimator.SetTrigger("shakeItem");
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            if (spray.sprayCanShakeSFX != null && spray.sprayCanShakeSFX.Length > 0 && spray.sprayAudio != null)
+            {
+                RoundManager.PlayRandomClip(spray.sprayAudio, spray.sprayCanShakeSFX);
+                if (spray.sprayCanShakeEmptySFX != null)
+                    WalkieTalkie.TransmitOneShotAudio(spray.sprayAudio, spray.sprayCanShakeEmptySFX);
+            }
         }
         catch
         {
