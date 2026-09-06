@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.6";
+    public const string ModVersion = "1.0.7";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -62,12 +62,12 @@ public class Plugin : BaseUnityPlugin
             "General",
             "AllowKeyRefill",
             true,
-            "Also allow the RefillKey (default R) in addition to Q-shake refill.");
+            "Allow refill with RefillKey (default R).");
 
         try
         {
             _harmony.PatchAll(typeof(Plugin).Assembly);
-            Log.LogInfo("Harmony patches applied (Q-shake refill + optional key + ChargeBatteries sync).");
+            Log.LogInfo("Harmony patches applied (R key refill + ChargeBatteries sync).");
         }
         catch (Exception ex)
         {
@@ -76,7 +76,7 @@ public class Plugin : BaseUnityPlugin
 
         WeedKillerRefillBehaviour.EnsureExists();
 
-        Log.LogInfo($"{ModName} v{ModVersion} loaded. Shake Q to refill (also key: {RefillKey.Value}).");
+        Log.LogInfo($"{ModName} v{ModVersion} loaded. Press {RefillKey.Value} to refill.");
     }
 
     internal static void V(string msg)
