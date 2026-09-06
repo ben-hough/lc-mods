@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.NoMineshaft";
     public const string ModName = "NoMineshaft";
-    public const string ModVersion = "1.0.5";
+    public const string ModVersion = "1.0.6";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
