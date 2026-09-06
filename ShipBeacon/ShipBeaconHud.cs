@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace ShipBeacon;
 
 /// <summary>
-/// Outdoor ship direction HUD using a Screen Space Overlay canvas (IMGUI often dies after moon load).
+/// Outdoor ship direction HUD using Screen Space Overlay + HUDManager TMP font.
 /// </summary>
 internal sealed class ShipBeaconHud : MonoBehaviour
 {
@@ -19,6 +19,11 @@ internal sealed class ShipBeaconHud : MonoBehaviour
     private string _lastHideReason = "";
     private bool _loggedVisible;
     private float _nextHeartbeat;
+    private bool _fontAssigned;
+    private string _lastBeaconDetail = "";
+
+    // Match clock HUD orange sampled from screenshot (~218,102,47) — less yellow than 1.0.8/9.
+    private static readonly Color ClockOrange = new Color(0.855f, 0.400f, 0.185f, 1f);
 
     internal static void EnsureExists()
     {
@@ -27,7 +32,6 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
         var go = new GameObject("ShipBeaconHUD");
         DontDestroyOnLoad(go);
-        // keep visible to Unity update loop
         _instance = go.AddComponent<ShipBeaconHud>();
     }
 
@@ -50,7 +54,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
         _canvas = gameObject.AddComponent<Canvas>();
         _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _canvas.sortingOrder = 1200;
+        _canvas.sortingOrder = 5000; // above most LC HUD
 
         var scaler = gameObject.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -65,44 +69,138 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         _labelRt.anchorMin = new Vector2(0.5f, Plugin.VerticalOffset.Value);
         _labelRt.anchorMax = new Vector2(0.5f, Plugin.VerticalOffset.Value);
         _labelRt.pivot = new Vector2(0.5f, 0.5f);
-        _labelRt.sizeDelta = new Vector2(640f, 64f);
+        _labelRt.sizeDelta = new Vector2(980f, 56f);
         _labelRt.anchoredPosition = Vector2.zero;
 
-        // Soft backdrop via Image behind text.
-        var bgGo = new GameObject("ShipBeaconBg", typeof(RectTransform));
-        bgGo.transform.SetParent(textGo.transform, false);
-        bgGo.transform.SetAsFirstSibling();
-        var bgRt = bgGo.GetComponent<RectTransform>();
-        bgRt.anchorMin = Vector2.zero;
-        bgRt.anchorMax = Vector2.one;
-        bgRt.offsetMin = new Vector2(-12f, -6f);
-        bgRt.offsetMax = new Vector2(12f, 6f);
-        var bg = bgGo.AddComponent<Image>();
-        bg.color = new Color(0f, 0f, 0f, 0.55f);
-        bg.raycastTarget = false;
-
+        // No grey backdrop — match bare orange clock HUD style.
         _label = textGo.AddComponent<TextMeshProUGUI>();
         _label.alignment = TextAlignmentOptions.Center;
         _label.fontStyle = FontStyles.Bold;
-        _label.color = new Color(0.9f, 0.96f, 1f, 1f);
+        _label.color = ClockOrange;
         _label.enableWordWrapping = false;
         _label.raycastTarget = false;
+        _label.overflowMode = TextOverflowModes.Overflow;
         _label.text = "";
+        // Soft glow like the top clock.
+        _label.fontSharedMaterial = null;
+        TryAssignFont();
+        ApplyClockStyle();
         ApplyScale();
 
         _canvas.enabled = false;
         Plugin.Log.LogInfo("ShipBeacon canvas HUD built.");
     }
 
+    private void TryAssignFont()
+    {
+        if (_label == null || _fontAssigned)
+            return;
+
+        try
+        {
+            TMP_FontAsset? font = null;
+            var hud = HUDManager.Instance;
+            if (hud != null)
+            {
+                // Prefer clock font so beacon matches top HUD.
+                if (hud.clockNumber != null && hud.clockNumber.font != null)
+                    font = hud.clockNumber.font;
+
+                if (font == null && hud.controlTipLines != null)
+                {
+                    foreach (var tip in hud.controlTipLines)
+                    {
+                        if (tip != null && tip.font != null)
+                        {
+                            font = tip.font;
+                            break;
+                        }
+                    }
+                }
+
+                if (font == null && hud.weightCounter != null)
+                    font = hud.weightCounter.font;
+            }
+
+            if (font == null && TMP_Settings.defaultFontAsset != null)
+                font = TMP_Settings.defaultFontAsset;
+
+            if (font != null)
+            {
+                _label.font = font;
+                _fontAssigned = true;
+                Plugin.Log.LogInfo($"ShipBeacon TMP font assigned: {font.name}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogWarning($"ShipBeacon font assign failed: {ex.Message}");
+        }
+    }
+
     private void ApplyScale()
     {
         if (_label == null)
             return;
-        _label.fontSize = 28f * Plugin.HudScale.Value;
+
+        // Prefer live clock size so we track the top HUD; fallback is a bit larger than 1.0.6.
+        float size = 28f;
+        try
+        {
+            var clock = HUDManager.Instance?.clockNumber;
+            if (clock != null && clock.fontSize > 1f)
+                size = clock.fontSize;
+        }
+        catch
+        {
+            // ignore — use fallback
+        }
+
+        _label.fontSize = size * Plugin.HudScale.Value;
+    }
+
+    private void ApplyClockStyle()
+    {
+        if (_label == null)
+            return;
+
+        try
+        {
+            // Vertex color only — faceColor/outline need a TMP material and NRE on cold start.
+            _label.color = ClockOrange;
+            _label.fontStyle = FontStyles.Bold;
+
+            if (Plugin.MatchClockStyle == null || !Plugin.MatchClockStyle.Value)
+                return;
+
+            var hud = HUDManager.Instance;
+            var clock = hud != null ? hud.clockNumber : null;
+            if (clock == null)
+                return;
+
+            if (clock.font != null)
+            {
+                _label.font = clock.font;
+                _fontAssigned = true;
+            }
+            // Never copy clock fontSharedMaterial (washes orange to white).
+        }
+        catch (Exception ex)
+        {
+            Plugin.Log.LogWarning($"ApplyClockStyle: {ex.Message}");
+            try { _label.color = ClockOrange; } catch { /* ignore */ }
+        }
     }
 
     private void LateUpdate()
     {
+        if (_canvas == null || _label == null || _labelRt == null)
+            BuildUi();
+
+        TryAssignFont();
+        ApplyClockStyle();
+        ApplyScale();
+
         if (Time.unscaledTime >= _nextHeartbeat)
         {
             _nextHeartbeat = Time.unscaledTime + 10f;
@@ -110,18 +208,19 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             var player = GameNetworkManager.Instance?.localPlayerController;
             Plugin.Log.LogInfo(
                 $"[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
+                $"font={_fontAssigned}, hide='{_lastHideReason}', detail='{_lastBeaconDetail}', " +
                 $"inShipPhase={start?.inShipPhase}, playerNull={player == null}, dead={player?.isPlayerDead}, " +
                 $"insideFactory={player?.isInsideFactory}, inShip={player?.isInHangarShipRoom}");
         }
 
-        if (Plugin.Instance == null || !Plugin.Enabled.Value)
+        // Don't use Plugin.Instance == null — BaseUnityPlugin is a UnityEngine.Object and
+        // Unity's overloaded == can fake-null a live plugin and permanently hide the HUD.
+        if (Plugin.Enabled == null || !Plugin.Enabled.Value)
         {
             SetVisible(false);
+            _lastHideReason = "disabled";
             return;
         }
-
-        if (_canvas == null || _label == null || _labelRt == null)
-            BuildUi();
 
         if (_labelRt != null)
         {
@@ -140,18 +239,25 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             return;
         }
 
-        var arrow = AngleToArrow(angleDeg);
-        _label!.text = Plugin.ShowDistance.Value
-            ? $"{arrow}  SHIP  {distance:0}m  {arrow}"
-            : $"{arrow}  SHIP  {arrow}";
-
-        SetVisible(true);
-
-        if (!_loggedVisible)
+        try
         {
-            _loggedVisible = true;
+            _label!.text = FormatBeacon(angleDeg, distance);
+
+            SetVisible(true);
             _lastHideReason = "";
-            Plugin.Log.LogInfo($"ShipBeacon visible: {distance:0}m, bearing {angleDeg:0} deg.");
+            _lastBeaconDetail = $"{distance:0}m bearing={angleDeg:0}";
+
+            if (!_loggedVisible)
+            {
+                _loggedVisible = true;
+                Plugin.Log.LogInfo($"ShipBeacon visible: {distance:0}m, bearing {angleDeg:0} deg.");
+            }
+        }
+        catch (Exception ex)
+        {
+            SetVisible(false);
+            MaybeLogHidden("label update: " + ex.Message);
+            _loggedVisible = false;
         }
     }
 
@@ -159,14 +265,20 @@ internal sealed class ShipBeaconHud : MonoBehaviour
     {
         if (_canvas != null && _canvas.enabled != visible)
             _canvas.enabled = visible;
+
+        // Also toggle the label GO in case canvas.enabled is ignored by LC overlays.
+        if (_label != null && _label.gameObject.activeSelf != visible)
+            _label.gameObject.SetActive(visible);
     }
 
     private void MaybeLogHidden(string reason)
     {
-        if (reason == _lastHideReason && Time.unscaledTime < _nextDebugLog)
+        reason ??= "";
+        var changed = reason != _lastHideReason;
+        _lastHideReason = reason;
+        if (!changed && Time.unscaledTime < _nextDebugLog)
             return;
 
-        _lastHideReason = reason;
         _nextDebugLog = Time.unscaledTime + 8f;
         if (!string.IsNullOrEmpty(reason))
             Plugin.Log.LogInfo($"ShipBeacon hidden: {reason}");
@@ -212,14 +324,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
                 return false;
             }
 
-            Transform? ship = null;
-            if (start.elevatorTransform != null)
-                ship = start.elevatorTransform;
-            else if (start.shipBounds != null)
-                ship = start.shipBounds.transform;
-            else if (start.shipLandingPosition != null)
-                ship = start.shipLandingPosition;
-
+            var ship = ResolveShipTransform(start);
             if (ship == null)
             {
                 hideReason = "no ship transform";
@@ -233,7 +338,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             var flat = ship.position - cam.position;
             flat.y = 0f;
             distance = flat.magnitude;
-            if (distance < 1f)
+            if (distance < 0.5f)
             {
                 hideReason = $"too close ({distance:0.0}m)";
                 return false;
@@ -257,24 +362,72 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         }
     }
 
-    private static string AngleToArrow(float signedAngleDeg)
+    private static Transform? ResolveShipTransform(StartOfRound start)
     {
-        var a = signedAngleDeg;
-        if (a < 0f)
-            a += 360f;
-
-        var sector = Mathf.RoundToInt(a / 45f) % 8;
-        return sector switch
+        // Prefer the actual HangarShip root (matches TerminalStuff / loot scans).
+        try
         {
-            0 => "^",
-            1 => "/^",
-            2 => ">>",
-            3 => "\\v",
-            4 => "v",
-            5 => "v/",
-            6 => "<<",
-            7 => "^\\",
-            _ => "*",
-        };
+            var hangar = GameObject.Find("/Environment/HangarShip")
+                ?? GameObject.Find("Environment/HangarShip")
+                ?? GameObject.Find("HangarShip");
+            if (hangar != null)
+                return hangar.transform;
+        }
+        catch
+        {
+            // ignored
+        }
+
+        if (start.shipDoorNode != null)
+            return start.shipDoorNode;
+        if (start.middleOfShipNode != null)
+            return start.middleOfShipNode;
+        if (start.elevatorTransform != null)
+            return start.elevatorTransform;
+        if (start.shipBounds != null)
+            return start.shipBounds.transform;
+        if (start.shipLandingPosition != null)
+            return start.shipLandingPosition;
+
+        try
+        {
+            var door = UnityEngine.Object.FindObjectOfType<HangarShipDoor>();
+            if (door != null)
+                return door.transform;
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return null;
+    }
+
+    private static string FormatBeacon(float signedAngleDeg, float distance)
+    {
+        // SignedAngle: negative = ship is left of view, positive = right.
+        var abs = Mathf.Abs(signedAngleDeg);
+        string body = Plugin.ShowDistance.Value
+            ? $"SHIP  {distance:0}m"
+            : "SHIP";
+
+        // Straight ahead: caret arrows on both sides.
+        if (abs <= 25f)
+            return $"^  {body}  ^";
+
+        // Mostly behind: down carets.
+        if (abs >= 155f)
+            return $"v  {body}  v";
+
+        // Side: chevrons only on the pointing side; count grows with turn.
+        var count = 1;
+        if (abs > 45f) count = 2;
+        if (abs > 70f) count = 3;
+        if (abs > 100f) count = 4;
+
+        if (signedAngleDeg < 0f)
+            return $"{new string('<', count)}  {body}";
+
+        return $"{body}  {new string('>', count)}";
     }
 }
