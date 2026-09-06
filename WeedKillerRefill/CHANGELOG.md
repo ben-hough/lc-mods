@@ -1,7 +1,11 @@
 # Changelog
 
+## 1.0.7
+- Control tip and user-facing text are R-only (removed Q from UI)
+- R remains the supported refill key
+
 ## 1.0.6
-- Primary Q-shake refill via `ItemInteractLeftRight` (vanilla skips shake on weed killer)
+- Q-shake refill path via `ItemInteractLeftRight` (kept internally; not shown in UI as of 1.0.7)
 - Optional R key
 - `ChargeBatteries` tank sync + Instance fix
 
