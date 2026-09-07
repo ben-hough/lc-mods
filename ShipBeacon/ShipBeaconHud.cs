@@ -68,6 +68,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         _labelRt = textGo.GetComponent<RectTransform>();
         _labelRt.anchorMin = new Vector2(0.5f, Plugin.VerticalOffset.Value);
         _labelRt.anchorMax = new Vector2(0.5f, Plugin.VerticalOffset.Value);
+        // Center pivot — stable at bottom (or wherever VerticalOffset points).
         _labelRt.pivot = new Vector2(0.5f, 0.5f);
         _labelRt.sizeDelta = new Vector2(980f, 56f);
         _labelRt.anchoredPosition = Vector2.zero;
@@ -143,13 +144,13 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         if (_label == null)
             return;
 
-        // Prefer live clock size so we track the top HUD; fallback is a bit larger than 1.0.6.
-        float size = 28f;
+        // Track clock size; stay slightly smaller than the clock digits.
+        float size = 26f;
         try
         {
             var clock = HUDManager.Instance?.clockNumber;
             if (clock != null && clock.fontSize > 1f)
-                size = clock.fontSize;
+                size = clock.fontSize * 0.92f;
         }
         catch
         {
@@ -207,7 +208,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             var start = StartOfRound.Instance;
             var player = GameNetworkManager.Instance?.localPlayerController;
             Plugin.Log.LogInfo(
-                $"[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
+                $("[Heartbeat] enabled={Plugin.Enabled.Value}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
                 $"font={_fontAssigned}, hide='{_lastHideReason}', detail='{_lastBeaconDetail}', " +
                 $"inShipPhase={start?.inShipPhase}, playerNull={player == null}, dead={player?.isPlayerDead}, " +
                 $"insideFactory={player?.isInsideFactory}, inShip={player?.isInHangarShipRoom}");
@@ -413,11 +414,11 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
         // Straight ahead: caret arrows on both sides.
         if (abs <= 25f)
-            return $"^  {body}  ^";
+            return $("^  {body}  ^");
 
         // Mostly behind: down carets.
         if (abs >= 155f)
-            return $"v  {body}  v";
+            return $("v  {body}  v");
 
         // Side: chevrons only on the pointing side; count grows with turn.
         var count = 1;
@@ -426,8 +427,8 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         if (abs > 100f) count = 4;
 
         if (signedAngleDeg < 0f)
-            return $"{new string('<', count)}  {body}";
+            return $("{new string('<', count)}  {body}");
 
-        return $"{body}  {new string('>', count)}";
+        return $("{body}  {new string('>', count)}");
     }
 }

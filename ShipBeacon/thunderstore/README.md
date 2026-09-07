@@ -15,9 +15,9 @@ Outdoor HUD beacon pointing toward the company ship.
 - Top-of-screen orange HUD (color matched to the in-game clock)
 - Direction cues:
   - **Ahead:** `^  SHIP  42m  ^`
-  - **Left / right:** `<<<  SHIP  42m` or `SHIP  42m  >>>` (chevrons only on the pointing side; count 1–4 by turn angle)
+  - **Left / right:** `<<<  SHIP  42m` or `SHIP  42m  >>>` (chevrons only on the pointing side)
   - **Behind:** `v  SHIP  42m  v`
-- Optional distance in meters
+- Text sits at the bottom of the screen frame (bottom-anchored)
 - Hidden in orbit, inside the factory, and while inside the ship
 
 ## Config (`BepInEx/config/com.benhough.lethal.ShipBeacon.cfg`)
@@ -26,14 +26,9 @@ Outdoor HUD beacon pointing toward the company ship.
 | --- | --- | --- |
 | `Enabled` | true | Master toggle |
 | `ShowDistance` | true | Append meters |
-| `HudScale` | 1.0 | Multiplier on clock-matched font size |
-| `VerticalOffset` | 0.9 | Screen Y anchor (0 = bottom, 1 = top). Above-clock placement works well around `0.9` |
+| `HudScale` | 1.0 | Multiplier on font size |
+| `VerticalOffset` | 0.10 | Bottom of beacon text (0 = bottom, 1 = top) |
 | `MatchClockStyle` | true | Prefer clock TMP font when available |
-
-## Troubleshooting
-
-- Wrong color / white text: use **1.0.10+** (older builds could steal clock face/material tint).
-- Not showing outdoors: check `LogOutput.log` for `ShipBeacon hidden:` reasons (`inShipPhase`, `inside factory`, etc.).
 
 ## Build
 
