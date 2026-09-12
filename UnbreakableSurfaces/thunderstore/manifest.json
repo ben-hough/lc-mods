@@ -1,0 +1,9 @@
+{
+  "name": "UnbreakableSurfaces",
+  "version_number": "1.0.1",
+  "website_url": "https://github.com/ben-hough/lc-unbreakable-surfaces",
+  "description": "Bridges and unstable platforms never collapse. Host should run it. (1.0.1: private-field safe)",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}
