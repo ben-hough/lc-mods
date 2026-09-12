@@ -1,0 +1,7 @@
+{
+  "name": "ShipTeleportTerminal",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/ben-hough/lc-ship-teleport-terminal",
+  "description": "Terminal TELEPORT/TP (and ITELEPORT/ITP) to fire the ship teleporter.",
+  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+}
