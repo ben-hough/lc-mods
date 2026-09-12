@@ -1,0 +1,7 @@
+{
+  "name": "CadaverWilt",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/ben-hough/lc-cadaver-wilt",
+  "description": "Cadaver blooms die when their plants are fully sprayed away. Host should run it.",
+  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+}
