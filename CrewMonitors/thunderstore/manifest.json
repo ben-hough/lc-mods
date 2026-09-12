@@ -1,0 +1,10 @@
+{
+  "name": "CrewMonitors",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/ben-hough/lc-crew-monitors",
+  "description": "Show living players' OpenBodyCams feeds on ship monitors; clones panels up to 8.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "Zaggy1024-OpenBodyCams-3.0.5"
+  ]
+}
