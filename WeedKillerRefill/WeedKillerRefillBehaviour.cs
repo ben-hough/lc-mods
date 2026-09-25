@@ -30,6 +30,7 @@ internal sealed class WeedKillerRefillBehaviour : MonoBehaviour
 
     private void LateUpdate()
     {
+        HostModGate.EnsureRegistered();
         if (Time.unscaledTime >= _nextAliveLog)
         {
             _nextAliveLog = Time.unscaledTime + 30f;

@@ -14,22 +14,19 @@ Refill an empty weed killer can without a trip back to the ship store.
 
 | Input | Action |
 | --- | --- |
-| **Q / shake** (`ItemInteractLeftRight`) | Primary refill — vanilla blocks normal shake on weed killer |
-| **R** (configurable) | Optional alternate refill key |
+| **R** (configurable `RefillKey`) | Refill held weed killer |
 
-Tank charge is synced via `ChargeBatteries`.
+Control tip shows `Refill : [R]` in the upper-right when holding an empty can.
 
 ## Config
 
 | Key | Default | Notes |
 | --- | --- | --- |
 | `Enabled` | true | Master toggle |
-| `RefillKey` | R | Optional keybind |
-| Other entries | — | See generated cfg after first launch |
-
-## Credits / inspiration
-
-Shake restore path inspired by BetterSprayPaint; charger sync ideas from WeedKillerAdjuster-style approaches.
+| `RefillKey` | R | Refill keybind |
+| `AllowKeyRefill` | true | Enable key refill |
+| `ShowControlTip` | true | Upper-right tip when empty |
+| `OnlyWhenEmpty` | true | Only refill when empty |
 
 ## Build
 

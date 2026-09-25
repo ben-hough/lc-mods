@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.WeedKillerRefill";
     public const string ModName = "WeedKillerRefill";
-    public const string ModVersion = "1.0.7";
+    public const string ModVersion = "1.0.10";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -52,7 +52,7 @@ public class Plugin : BaseUnityPlugin
             "General",
             "ShowControlTip",
             true,
-            "Show a vanilla top-right control tip (Refill : [R]) when holding an empty weed killer.");
+            "Show a vanilla upper-right control tip (Refill : [R]) when holding an empty weed killer.");
         Verbose = Config.Bind(
             "General",
             "VerboseLogging",

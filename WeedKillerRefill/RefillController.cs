@@ -10,7 +10,7 @@ internal static class RefillController
 
     internal static void Tick(string source)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value || !Plugin.AllowKeyRefill.Value)
+        if (!HostModGate.FeaturesActive || !Plugin.AllowKeyRefill.Value)
             return;
 
         if (!WeedKillerUtil.TryGetHeldWeedKiller(out var spray))
@@ -24,7 +24,7 @@ internal static class RefillController
 
     internal static void TickHeld(SprayPaintItem spray, string source)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value || spray == null)
+        if (!HostModGate.FeaturesActive || spray == null)
             return;
 
         if (!Plugin.AllowKeyRefill.Value)
@@ -35,7 +35,7 @@ internal static class RefillController
         {
             _loggedHoldingEmpty = true;
             Plugin.Log.LogInfo(
-                $"[{source}] Holding empty weed killer (tank={spray.sprayCanTank:0.###}). Press Q to shake-refill (or {Plugin.RefillKey.Value}).");
+                $"[{source}] Holding empty weed killer (tank={spray.sprayCanTank:0.###}). Press {Plugin.RefillKey.Value} to refill.");
         }
         else if (!empty)
         {

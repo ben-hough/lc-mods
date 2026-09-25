@@ -9,7 +9,7 @@ internal static class GrabbableObjectControlTipsPatch
     [HarmonyPostfix]
     private static void Postfix(GrabbableObject __instance)
     {
-        if (!Plugin.ShowControlTip.Value || !Plugin.Enabled.Value)
+        if (!Plugin.ShowControlTip.Value || !HostModGate.FeaturesActive)
             return;
 
         if (__instance is not SprayPaintItem spray || !spray.isWeedKillerSprayBottle)
@@ -18,16 +18,16 @@ internal static class GrabbableObjectControlTipsPatch
         if (!WeedKillerUtil.IsHeldByLocalPlayer(spray))
             return;
 
-        if (!WeedKillerUtil.IsEmpty(spray))
+        if (Plugin.OnlyWhenEmpty.Value && !WeedKillerUtil.IsEmpty(spray))
+            return;
+
+        if (!Plugin.AllowKeyRefill.Value)
             return;
 
         var hud = HUDManager.Instance;
         if (hud == null)
             return;
 
-        // UI shows RefillKey only (default R). Q-shake path kept but not advertised.
-        if (!Plugin.AllowKeyRefill.Value)
-            return;
         var r = InputUtil.TipLabel(Plugin.RefillKey.Value);
         hud.ChangeControlTip(2, $"Refill : [{r}]");
     }
@@ -43,7 +43,7 @@ internal static class SprayPaintShakeRefillPatch
     [HarmonyPostfix]
     private static void Postfix(SprayPaintItem __instance, bool right)
     {
-        if (!Plugin.Enabled.Value || right)
+        if (!HostModGate.FeaturesActive || right)
             return;
 
         if (!__instance.isWeedKillerSprayBottle)
@@ -74,7 +74,7 @@ internal static class SprayPaintLateUpdatePatch
     [HarmonyPostfix]
     private static void Postfix(SprayPaintItem __instance)
     {
-        if (!Plugin.Enabled.Value || !Plugin.AllowKeyRefill.Value)
+        if (!HostModGate.FeaturesActive || !Plugin.AllowKeyRefill.Value)
             return;
 
         if (!__instance.isWeedKillerSprayBottle)
@@ -110,6 +110,7 @@ internal static class StartOfRoundEnsurePatch
     private static void Postfix()
     {
         WeedKillerRefillBehaviour.EnsureExists();
+        HostModGate.EnsureRegistered();
         Plugin.Log.LogInfo("[StartOfRound.Start] refill behaviour ensured");
     }
 }
@@ -118,7 +119,10 @@ internal static class StartOfRoundEnsurePatch
 internal static class HudManagerEnsurePatch
 {
     [HarmonyPostfix]
-    private static void Postfix() => WeedKillerRefillBehaviour.EnsureExists();
+    private static void Postfix()
+    {
+        WeedKillerRefillBehaviour.EnsureExists();
+    }
 }
 
 /// <summary>
@@ -131,6 +135,8 @@ internal static class ChargeBatteriesTankSyncPatch
     [HarmonyPostfix]
     private static void Postfix(GrabbableObject __instance)
     {
+        if (!HostModGate.FeaturesActive)
+            return;
         if (__instance is not SprayPaintItem spray || !spray.isWeedKillerSprayBottle)
             return;
 
