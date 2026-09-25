@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>CrewMonitors</AssemblyName>
     <RootNamespace>CrewMonitors</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.32</Version>
   </PropertyGroup>
 
   <ItemGroup>

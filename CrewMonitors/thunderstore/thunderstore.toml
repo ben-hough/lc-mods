@@ -1,0 +1,30 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "MrGlim"
+name = "CrewMonitors"
+versionNumber = "1.0.32"
+description = "4-panel crew OpenBodyCams stack: body/map/external cycle, click-to-focus radar, OBC-matched screens."
+websiteUrl = "https://github.com/ben-hough/lc-crew-monitors"
+containsNsfwContent = false
+
+[package.dependencies]
+BepInEx-BepInExPack = "5.4.2100"
+Zaggy1024-OpenBodyCams = "3.0.5"
+
+[build]
+iconPath = "icon.png"
+readmePath = "README.md"
+outdir = "../build-CrewMonitors"
+
+[[build.copy]]
+source = "CrewMonitors.dll"
+target = "CrewMonitors.dll"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["lethal-company"]
+
+[publish.categories]
+lethal-company = ["mods", "tweaks-and-quality-of-life", "ai-generated"]
