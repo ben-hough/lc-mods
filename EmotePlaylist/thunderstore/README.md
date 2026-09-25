@@ -1,17 +1,46 @@
 # EmotePlaylist
 
-Companion for FlipMods TooManyEmotes. Turns your 8 quick-slot remotes into a looping playlist.
+Loop TooManyEmotes quick-slot remotes on a shared cycle. Press E to sync into the playlist.
 
-**Requires:** FlipMods-TooManyEmotes
+**Thunderstore:** [MrGlim-EmotePlaylist](https://thunderstore.io/c/lethal-company/p/MrGlim/EmotePlaylist/)  
+**Source:** [lc-emote-playlist](https://github.com/ben-hough/lc-emote-playlist)  
+**Game:** Lethal Company (BepInEx)
 
-## Use
+> **Networking:** Requires TooManyEmotes; install on clients who want to join the playlist.
 
-1. Assign emotes to the quick slots (wheel remotes).
-2. Press **F10** (configurable `ListKey`) to show/hide the on-screen playlist panel (slot names 1–8). With `ShowListOnStart` (default on), the list appears briefly when you first spawn this session, plus a tip.
-3. Press **F9** (configurable `PlaylistKey`) to start. Press again to stop.
-4. Each emote plays for `SecondsPerEmote` (default 120, clamped 60–300), then the next, then loops. While running, the list highlights the current slot and remaining seconds.
-5. Another player looks at you and presses **E**. If they also have this mod, they join the whole list and the same cycle clock (not just the current dance).
+## Features
 
-Optional `PlaylistOverride`: comma-separated emote names instead of the quick slots.
+- Cycles TooManyEmotes quick-slot remotes on a shared timer
+- F9 starts/stops playlist; F10 lists slots (configurable)
+- Press E to join the current playlist sync
+- Optional override string for custom slot order
 
-Everyone who should follow the playlist needs this mod installed.
+## Install
+
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install dependency **FlipMods-TooManyEmotes** from Thunderstore.
+3. Install **MrGlim-EmotePlaylist** via Thunderstore / r2modman / Gale, or drop `EmotePlaylist.dll` into `BepInEx/plugins/`.
+
+Requires FlipMods-TooManyEmotes. Clients who want to dance need the mod.
+
+## Config (`BepInEx/config/com.benhough.lethal.EmotePlaylist.cfg`)
+
+| Key | Default | Notes |
+| --- | --- | --- |
+| `Enabled` | true | Master toggle |
+| `PlaylistKey` | F9 | Start/stop playlist |
+| `ListKey` | F10 | List quick-slot remotes |
+| `ShowListOnStart` | true | Print list when playlist starts |
+| `SecondsPerEmote` | 120 | Seconds per emote (≈1–5 min) |
+| `PlaylistOverride` | "" | Optional comma-separated slot override |
+
+## Changelog
+- **1.0.3** — Host-gated networking where applicable, new icon, Thunderstore categories (incl. AI Generated), polished README.
+
+
+### 1.0.2
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
+
+## License
+
+MIT

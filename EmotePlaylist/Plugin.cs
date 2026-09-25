@@ -13,7 +13,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.EmotePlaylist";
     public const string ModName = "EmotePlaylist";
-    public const string ModVersion = "1.0.2";
+    public const string ModVersion = "1.0.3";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
