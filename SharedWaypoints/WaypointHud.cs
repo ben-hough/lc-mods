@@ -131,6 +131,9 @@ internal sealed class WaypointHud : MonoBehaviour
 
         TryAssignFont();
 
+        // Map markers need per-frame scale lerp (vanilla door codes); cheap reconcile.
+        WaypointMapMarkers.Sync();
+
         if (Time.unscaledTime < _nextRefresh)
             return;
         _nextRefresh = Time.unscaledTime + 0.1f;
@@ -144,6 +147,7 @@ internal sealed class WaypointHud : MonoBehaviour
         if (inShip && !_wasInShipPhase)
         {
             WaypointRegistry.ClearAll();
+            WaypointMapMarkers.DestroyAll();
             Plugin.Log.LogInfo("Cleared waypoints entering ship phase.");
         }
         _wasInShipPhase = inShip;
@@ -183,7 +187,10 @@ internal sealed class WaypointHud : MonoBehaviour
         WaypointNet.BroadcastSet(state);
 
         var where = state.IsInside ? "inside" : "outside";
-        Feedback($"Waypoint dropped ({where})", "Shared Waypoint", $"Dropped {where} at your position.");
+        Feedback(
+            $"Waypoint dropped ({where})",
+            "Shared Waypoint",
+            $"Dropped {where} pin (keeps your other zone pin).");
         Plugin.Log.LogInfo(
             $"Dropped waypoint inside={state.IsInside} pos={state.Position} owner={state.OwnerPlayerClientId}.");
     }
@@ -191,16 +198,19 @@ internal sealed class WaypointHud : MonoBehaviour
     private static void ClearWaypoint(GameNetcodeStuff.PlayerControllerB player)
     {
         var id = player.playerClientId;
-        if (!WaypointRegistry.TryGet(id, out _))
+        var inside = player.isInsideFactory;
+        if (!WaypointRegistry.TryGet(id, inside, out _))
         {
-            Feedback("No waypoint to clear", "Shared Waypoint", "You have no active waypoint.");
+            var zone = inside ? "indoor" : "outdoor";
+            Feedback($"No {zone} waypoint", "Shared Waypoint", $"You have no {zone} pin to clear.");
             return;
         }
 
-        WaypointRegistry.Clear(id);
-        WaypointNet.BroadcastClear(id);
-        Feedback("Waypoint cleared", "Shared Waypoint", "Your waypoint was removed.");
-        Plugin.Log.LogInfo($"Cleared own waypoint owner={id}.");
+        WaypointRegistry.Clear(id, inside);
+        WaypointNet.BroadcastClear(id, inside);
+        var cleared = inside ? "indoor" : "outdoor";
+        Feedback($"Waypoint cleared ({cleared})", "Shared Waypoint", $"Your {cleared} pin was removed.");
+        Plugin.Log.LogInfo($"Cleared own waypoint owner={id} inside={inside}.");
     }
 
     private static void Feedback(string tip, string title, string body)

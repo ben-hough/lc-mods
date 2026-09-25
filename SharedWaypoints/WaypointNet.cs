@@ -63,16 +63,18 @@ internal static class WaypointNet
             nm.CustomMessagingManager.SendNamedMessage(MessageName, NetworkManager.ServerClientId, writer, NetworkDelivery.Reliable);
     }
 
-    public static void BroadcastClear(ulong ownerPlayerClientId)
+    public static void BroadcastClear(ulong ownerPlayerClientId, bool isInside)
     {
         EnsureRegistered();
         var nm = NetworkManager.Singleton;
         if (nm == null)
             return;
 
-        var writer = new FastBufferWriter(16, Allocator.Temp);
+        // op + owner + isInside
+        var writer = new FastBufferWriter(24, Allocator.Temp);
         writer.WriteValueSafe((byte)0);
         writer.WriteValueSafe(ownerPlayerClientId);
+        writer.WriteValueSafe(isInside);
         if (nm.IsServer)
             nm.CustomMessagingManager.SendNamedMessageToAll(MessageName, writer, NetworkDelivery.Reliable);
         else
@@ -86,7 +88,8 @@ internal static class WaypointNet
         if (nm == null || nm.IsServer)
             return;
 
-        var writer = new FastBufferWriter(8, Allocator.Temp);
+        // byte op + ulong pad = 9 bytes; keep headroom like BroadcastClear
+        var writer = new FastBufferWriter(16, Allocator.Temp);
         writer.WriteValueSafe((byte)2);
         writer.WriteValueSafe(0UL);
         nm.CustomMessagingManager.SendNamedMessage(MessageName, NetworkManager.ServerClientId, writer, NetworkDelivery.Reliable);
@@ -119,7 +122,7 @@ internal static class WaypointNet
             nm.CustomMessagingManager.SendNamedMessage(MessageName, clientId, writer, NetworkDelivery.Reliable);
         }
 
-        Plugin.Log.LogInfo($"Resynced {WaypointRegistry.All.Count} waypoint(s) to client {clientId}.");
+        Plugin.Log.LogInfo($"Resynced {WaypointRegistry.Count} waypoint(s) to client {clientId}.");
     }
 
     private static FastBufferWriter WriteSet(WaypointState state)
@@ -154,14 +157,16 @@ internal static class WaypointNet
 
         if (op == 0)
         {
-            WaypointRegistry.Clear(owner);
-            Plugin.Log.LogInfo($"Waypoint cleared for owner={owner}.");
+            reader.ReadValueSafe(out bool clearInside);
+            WaypointRegistry.Clear(owner, clearInside);
+            Plugin.Log.LogInfo($"Waypoint cleared for owner={owner} inside={clearInside}.");
 
             if (nm != null && nm.IsServer)
             {
-                var stop = new FastBufferWriter(16, Allocator.Temp);
+                var stop = new FastBufferWriter(24, Allocator.Temp);
                 stop.WriteValueSafe((byte)0);
                 stop.WriteValueSafe(owner);
+                stop.WriteValueSafe(clearInside);
                 nm.CustomMessagingManager.SendNamedMessageToAll(MessageName, stop, NetworkDelivery.Reliable);
                 stop.Dispose();
             }

@@ -10,7 +10,10 @@ internal static class StartOfRoundStartPatch
         WaypointHud.EnsureExists();
         // Ship/orbit phase or fresh load — drop stale pins.
         if (__instance != null && __instance.inShipPhase)
+        {
             WaypointRegistry.ClearAll();
+            WaypointMapMarkers.DestroyAll();
+        }
         Plugin.Log.LogInfo("SharedWaypoints HUD ensured after StartOfRound.Start.");
     }
 }
@@ -30,6 +33,7 @@ internal static class ShipLeavePatch
     private static void Prefix()
     {
         WaypointRegistry.ClearAll();
+        WaypointMapMarkers.DestroyAll();
         Plugin.Log.LogInfo("Cleared waypoints on ShipLeave.");
     }
 }
@@ -40,6 +44,7 @@ internal static class DisconnectPatch
     private static void Prefix()
     {
         WaypointRegistry.ClearAll();
+        WaypointMapMarkers.DestroyAll();
         Plugin.Log.LogInfo("Cleared waypoints on disconnect.");
     }
 }

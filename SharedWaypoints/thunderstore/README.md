@@ -1,37 +1,48 @@
 # SharedWaypoints
 
-Lethal Company BepInEx QoL mod — drop a waypoint that appears on every modded player's HUD.
+Drop shared waypoints for your crew — fixed top-right HUD **and** ship radar / map video feeds (including CrewMonitors map feeds). Indoor/outdoor aware; F8 drop, F7 clear. Host syncs markers.
 
-**Requires:** BepInExPack (v81 game)
+**Thunderstore:** [MrGlim-SharedWaypoints](https://thunderstore.io/c/lethal-company/p/MrGlim/SharedWaypoints/)  
+**Source:** [lc-shared-waypoints](https://github.com/ben-hough/lc-shared-waypoints)  
+**Game:** Lethal Company (BepInEx)
 
-## Use
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
 
-| Key | Action |
-|-----|--------|
-| **F8** (`DropKey`) | Place / replace your waypoint at your feet |
-| **F7** (`ClearKey`) | Clear your waypoint for everyone |
+## Features
 
-One waypoint per player. Synced over Unity Netcode to all clients with the mod.
+- Shared waypoint on HUD and ship radar / map feeds
+- Works with CrewMonitors map feeds (no soft dependency — same world markers as door codes)
+- Indoor/outdoor aware (1 indoor + 1 outdoor pin per player)
+- F8 drop / F7 clear (configurable keys)
+- Configurable max distance and HUD scale
 
-## Indoor / outdoor filter
+## Install
 
-Waypoints remember whether you were **inside the factory** (`isInsideFactory`) when you dropped them.
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install **MrGlim-SharedWaypoints** via Thunderstore / r2modman / Gale, or drop `SharedWaypoints.dll` into `BepInEx/plugins/`.
 
-- Factory pins only render while you are inside the factory.
-- Outdoor / ship pins only render while you are **not** inside the factory.
-
-So a pin dropped in the facility will not clutter outdoor HUD, and vice versa.
+Host should run this so waypoints sync to the lobby.
 
 ## Config (`BepInEx/config/com.benhough.lethal.SharedWaypoints.cfg`)
 
-- `Enabled` — master toggle
-- `DropKey` / `ClearKey` — defaults F8 / F7
-- `MaxDistance` — hide markers beyond this (default 500 m)
-- `ShowOwnWaypoint` — show your own pin (default true)
-- `HudScale` — marker text scale (default 1)
+| Key | Default | Notes |
+| --- | --- | --- |
+| `Enabled` | true | Master toggle |
+| `DropKey` | F8 | Drop waypoint (current zone) |
+| `ClearKey` | F7 | Clear your current-zone waypoint |
+| `MaxDistance` | 500 | Max HUD/map draw distance |
+| `ShowOwnWaypoint` | true | Show your own marker on HUD and map |
+| `HudScale` | 1.0 | HUD scale multiplier |
 
-## Notes
+## Changelog
 
-- Peers without the mod simply won't send or see pins.
-- Late joiners receive a resync of existing waypoints from the host.
-- All waypoints clear when leaving the moon, entering ship phase, or disconnecting.
+### 1.0.4
+- Waypoint pins on ship radar / map video feeds (vanilla map camera + CrewMonitors map feeds that copy culling).
+- HUD and networking unchanged.
+
+### 1.0.3
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
+
+## License
+
+MIT

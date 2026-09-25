@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.SharedWaypoints";
     public const string ModName = "SharedWaypoints";
-    public const string ModVersion = "1.0.1";
+    public const string ModVersion = "1.0.4";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -34,12 +34,12 @@ public class Plugin : BaseUnityPlugin
             "General",
             "DropKey",
             KeyCode.F8,
-            "Place or replace your waypoint at your current position.");
+            "Place or replace your waypoint for the current zone (1 indoor + 1 outdoor per player).");
         ClearKey = Config.Bind(
             "General",
             "ClearKey",
             KeyCode.F7,
-            "Remove your waypoint for everyone.");
+            "Remove your waypoint for the current zone (indoor/outdoor) for everyone.");
         MaxDistance = Config.Bind(
             "General",
             "MaxDistance",
@@ -49,7 +49,7 @@ public class Plugin : BaseUnityPlugin
             "General",
             "ShowOwnWaypoint",
             true,
-            "Show your own waypoint on the HUD.");
+            "Show your own waypoint on the HUD and ship radar / map feeds.");
         HudScale = Config.Bind(
             "General",
             "HudScale",
