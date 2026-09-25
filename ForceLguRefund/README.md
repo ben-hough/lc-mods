@@ -23,3 +23,7 @@ The mod polls LGU upgrade nodes and sets `Refundable = true`. If a node's refund
 
 - Everyone who should see refunds should run this (or at least the client using the store).
 - CSync may overwrite LGU's `REFUND_UPGRADES` config; the node `Refundable` flag is the real UI gate.
+
+## Building
+
+`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `MoreShipUpgrades.dll` (from [malco-Lategame_Upgrades](https://thunderstore.io/c/lethal-company/p/malco/Lategame_Upgrades/)) is not included either: the csproj expects it at `/workspace/refs/MoreShipUpgrades.dll`. Put a copy there or change the `HintPath` to your r2modman/Gale profile's copy.

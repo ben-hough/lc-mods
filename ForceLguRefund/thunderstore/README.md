@@ -1,25 +1,39 @@
 # ForceLguRefund
 
-Companion for [malco Lategame_Upgrades](https://thunderstore.io/c/lethal-company/p/malco/Lategame_Upgrades/). Forces the LGU refund UI on so you can sell back an upgrade level.
+Force Late Game Upgrades refund UI on so you can sell back upgrade levels. Companion for malco Lategame_Upgrades.
 
-**Requires:** malco-Lategame_Upgrades (hard dependency)
+**Thunderstore:** [MrGlim-ForceLguRefund](https://thunderstore.io/c/lethal-company/p/MrGlim/ForceLguRefund/)  
+**Source:** [lc-force-lgu-refund](https://github.com/ben-hough/lc-force-lgu-refund)  
+**Game:** Lethal Company (BepInEx)
 
-## Use
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
 
-1. Install this alongside Late Game Upgrades.
-2. Open the LGU store (`lgu` / `lategame store` in the terminal).
-3. Unlocked upgrades show the refund action so you can sell a level back.
+## Features
 
-The mod polls LGU upgrade nodes and sets `Refundable = true`. If a node's refund percentage is 0, it is treated as 100% unless you override it.
+- Forces LGU terminal nodes to be refundable
+- Optional override for refund percentage
+- Companion tweak for malco Late Game Upgrades
+
+## Install
+
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install dependency **malco-Lategame_Upgrades** from Thunderstore.
+3. Install **MrGlim-ForceLguRefund** via Thunderstore / r2modman / Gale, or drop `ForceLguRefund.dll` into `BepInEx/plugins/`.
+
+Requires malco-Lategame_Upgrades. Host/clients should match for shop UI consistency.
 
 ## Config (`BepInEx/config/com.benhough.lethal.ForceLguRefund.cfg`)
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| Enabled | true | Master toggle — force `CustomTerminalNode.Refundable` so the refund UI works as client |
-| RefundPercentageOverride | -1 | If >= 0, override each node's refund % (0–100). -1 leaves node values (but 0 becomes 100%) |
+| Key | Default | Notes |
+| --- | --- | --- |
+| `Enabled` | true | Force Refundable=true on LGU nodes |
+| `RefundPercentageOverride` | -1 | >=0 overrides %; -1 keeps node values |
 
-## Notes
+## Changelog
 
-- Everyone who should see refunds should run this (or at least the client using the store).
-- CSync may overwrite LGU's `REFUND_UPGRADES` config; the node `Refundable` flag is the real UI gate.
+### 1.0.1
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
+
+## License
+
+MIT

@@ -15,7 +15,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ForceLguRefund";
     public const string ModName = "ForceLguRefund";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.1";
     public const string LguGuid = "com.malco.lethalcompany.moreshipupgrades";
 
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -55,7 +55,8 @@ public class Plugin : BaseUnityPlugin
 
     internal static void ForceAllNodesRefundable()
     {
-        if (!Enabled.Value)
+        HostModGate.EnsureRegistered();
+        if (!HostModGate.FeaturesActive)
             return;
 
         System.Collections.Generic.List<CustomTerminalNode>? nodes;

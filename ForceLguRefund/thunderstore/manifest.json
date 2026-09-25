@@ -1,8 +1,8 @@
 {
   "name": "ForceLguRefund",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/ben-hough/lc-force-lgu-refund",
-  "description": "Force Late Game Upgrades refund UI on so you can sell back a level. Companion for malco Lategame_Upgrades.",
+  "description": "Force Late Game Upgrades refund UI on so you can sell back upgrade levels. Companion for malco Lategame_Upgrades.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",
     "malco-Lategame_Upgrades-3.14.0"

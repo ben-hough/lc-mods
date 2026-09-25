@@ -20,7 +20,7 @@ internal static class CanRefundUpgradeLevelPatch
     [HarmonyPrefix]
     private static bool Prefix(CustomTerminalNode node, ref bool __result)
     {
-        if (!Plugin.Enabled.Value || node == null)
+        if (!HostModGate.FeaturesActive || node == null)
             return true;
 
         // Ensure ConfirmRefundUpgradeLevel's Refundable check also passes.
@@ -44,7 +44,7 @@ internal static class ConfirmRefundUpgradeLevelPatch
     [HarmonyPrefix]
     private static void Prefix(CustomTerminalNode node)
     {
-        if (!Plugin.Enabled.Value || node == null)
+        if (!HostModGate.FeaturesActive || node == null)
             return;
 
         if (!node.Refundable)
