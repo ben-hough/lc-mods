@@ -1,7 +1,9 @@
 {
   "name": "DoorTeleporter",
-  "version_number": "1.0.0",
+  "version_number": "1.0.2",
   "website_url": "https://github.com/ben-hough/lc-door-teleporter",
-  "description": "Terminal DOORPORT/DTP teleports you in front of a random main or fire exit.",
-  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+  "description": "Terminal DOORPORT/DTP teleports you in front of a random main entrance or fire exit. Host recommended.",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
 }
