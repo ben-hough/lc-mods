@@ -9,7 +9,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.CadaverWilt";
     public const string ModName = "CadaverWilt";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.2";
 
     internal static ManualLogSource Log { get; private set; } = null!;
 

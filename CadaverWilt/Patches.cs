@@ -28,6 +28,9 @@ internal static class CadaverWipe
 {
     internal static void TryKillBlooms()
     {
+        if (!HostModGate.FeaturesActive)
+            return;
+
         var nm = NetworkManager.Singleton;
         if (nm != null && !nm.IsServer)
             return;
@@ -84,4 +87,10 @@ internal static class CadaverWipe
         if (killed > 0)
             Plugin.Log.LogInfo($"All cadaver plants gone. Killed {killed} cadaver(s).");
     }
+}
+
+[HarmonyPatch(typeof(StartOfRound), "Start")]
+internal static class HostModGateStartPatch
+{
+    private static void Postfix() => HostModGate.EnsureRegistered();
 }
