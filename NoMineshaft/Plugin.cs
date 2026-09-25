@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.NoMineshaft";
     public const string ModName = "NoMineshaft";
-    public const string ModVersion = "1.0.6";
+    public const string ModVersion = "1.0.7";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -31,13 +31,8 @@ public class Plugin : BaseUnityPlugin
         Verbose = Config.Bind("General", "VerboseLogging", true,
             "Extra Info logs for dungeon scrub/remap/DunGen (debugging).");
 
-        if (!Enabled.Value)
-        {
-            Log.LogInfo($"{ModName} is disabled via config.");
-            return;
-        }
-
         ManualPatches.Apply(_harmony);
+        _harmony.PatchAll(typeof(HostModGateDisconnectPatch));
         DungeonTypeWatcher.EnsureExists();
 
         Log.LogInfo($"{ModName} v{ModVersion} loaded. Verbose={Verbose.Value}");

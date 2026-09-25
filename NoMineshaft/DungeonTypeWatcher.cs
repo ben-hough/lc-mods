@@ -31,7 +31,8 @@ internal sealed class DungeonTypeWatcher : MonoBehaviour
     private void LateUpdate()
     {
         // Never use Plugin.Instance == null — Unity fake-nulls BaseUnityPlugin and kills the watcher.
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+        HostModGate.EnsureRegistered();
+        if (!HostModGate.FeaturesActive)
             return;
 
         if (Time.unscaledTime < _next)

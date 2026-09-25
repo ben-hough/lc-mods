@@ -1,42 +1,38 @@
 # NoMineshaft
 
-Lethal Company BepInEx mod that removes **Mineshaft** interiors from dungeon rotation.
+Removes Mineshaft interiors from dungeon rotation. Host must run this for moon generation.
 
 **Thunderstore:** [MrGlim-NoMineshaft](https://thunderstore.io/c/lethal-company/p/MrGlim/NoMineshaft/)  
-**Game:** Lethal Company v81 (and compatible)
+**Source:** [lc-no-mineshaft](https://github.com/ben-hough/lc-no-mineshaft)  
+**Game:** Lethal Company (BepInEx)
+
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
+
+## Features
+
+- Scrubs Mineshaft (dungeon id 4 / Level3Flow) from moon dungeon lists
+- Intercepts floor generation so Mineshaft does not slip back in
+- Clients benefit automatically when the lobby host has it
 
 ## Install
 
-1. Install [BepInEx Pack for Lethal Company](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/).
-2. Drop `NoMineshaft.dll` into `BepInEx/plugins/` (or install via r2modman / Gale).
-3. **Host must run this mod** — dungeon selection is decided on the host.
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install **MrGlim-NoMineshaft** via Thunderstore / r2modman / Gale, or drop `NoMineshaft.dll` into `BepInEx/plugins/`.
 
-## What it does
+Host must run this — dungeon selection is decided on the host.
 
-- Scrubs Mineshaft (dungeon id `4` / Level3Flow) from moon dungeon lists
-- Intercepts floor generation and keeps a lightweight watcher so Mineshaft does not slip back in
-- Works for host; clients benefit when the host has it
-
-## Config (`BepInEx/config`)
+## Config (`BepInEx/config/com.benhough.lethal.NoMineshaft.cfg`)
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `Enabled` | true | Master toggle |
+| `Enabled` | true | Remove Mineshaft from rotation |
 | `VerboseLogging` | true | Extra scrub/watcher logs |
 
-## Troubleshooting
+## Changelog
 
-- Still seeing Mineshaft? Confirm the **lobby host** has `NoMineshaft` loaded (`LogOutput.log` should show `NoMineshaft v1.0.6 loaded` and scrub lines).
-- Zero runtime logs after load can mean an old broken build — use **1.0.6+**.
-
-## Build
-
-```bash
-dotnet build -c Release
-```
-
-Output: `bin/Release/netstandard2.1/NoMineshaft.dll`
+### 1.0.7
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT

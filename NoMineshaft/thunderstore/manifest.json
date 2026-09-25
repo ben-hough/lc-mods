@@ -1,8 +1,8 @@
 {
   "name": "NoMineshaft",
-  "version_number": "1.0.6",
+  "version_number": "1.0.7",
   "website_url": "https://github.com/ben-hough/lc-no-mineshaft",
-  "description": "Removes Mineshaft interiors from Lethal Company dungeon rotation (host + client).",
+  "description": "Removes Mineshaft interiors from dungeon rotation. Host must run this for moon generation.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]

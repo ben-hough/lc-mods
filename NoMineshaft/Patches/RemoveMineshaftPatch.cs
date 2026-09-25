@@ -203,6 +203,13 @@ internal static class ManualPatches
                 harmony.Patch(generate, prefix: new HarmonyMethod(typeof(DunGenPatch), nameof(DunGenPatch.Prefix)));
                 Plugin.Log.LogInfo("Patched DungeonGenerator.Generate");
             }
+            var disc = AccessTools.Method(typeof(GameNetworkManager), "Disconnect");
+            if (disc != null)
+            {
+                harmony.Patch(disc, prefix: new HarmonyMethod(typeof(HostModGateDisconnectPatch), "Prefix"));
+                Plugin.Log.LogInfo("Patched GameNetworkManager.Disconnect for host gate reset");
+            }
+
         }
         catch (Exception ex)
         {
@@ -215,7 +222,7 @@ internal static class GenFloorPatch
 {
     public static void Prefix(RoundManager __instance)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         try
         {
             Plugin.Log.LogInfo($"[GenerateNewFloor] level={__instance.currentLevel?.name} type={__instance.currentDungeonType} isServer={__instance.IsServer}");
@@ -230,7 +237,7 @@ internal static class LoadLevelPatch
 {
     public static void Prefix(RoundManager __instance, int randomSeed, SelectableLevel newLevel)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         try
         {
             Plugin.Log.LogInfo($"[LoadNewLevel] seed={randomSeed} level={newLevel?.name}");
@@ -244,7 +251,7 @@ internal static class ClientRpcPatch
 {
     public static void Prefix(RoundManager __instance, int randomSeed, int levelID)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         try
         {
             Plugin.Log.LogInfo($"[GenerateNewLevelClientRpc] seed={randomSeed} levelID={levelID} type={__instance.currentDungeonType}");
@@ -261,7 +268,7 @@ internal static class MapSeedPatch
 
     public static void Postfix(StartOfRound __instance)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         try
         {
             var manager = RoundManager.Instance;
@@ -318,9 +325,10 @@ internal static class StartPatch
 {
     public static void Postfix()
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         Plugin.Log.LogInfo("[StartOfRound.Start] ensuring watcher + scrubbing moons");
         DungeonTypeWatcher.EnsureExists();
+        HostModGate.EnsureRegistered();
         try { MineshaftScrubber.ScrubAllLevels("StartOfRound.Start"); }
         catch (Exception ex) { Plugin.Log.LogWarning(ex.Message); }
     }
@@ -330,7 +338,7 @@ internal static class DunGenPatch
 {
     public static void Prefix(DungeonGenerator __instance)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
 
         try
         {
@@ -372,7 +380,7 @@ internal static class GenFloorPostfixPatch
 {
     public static void Postfix(RoundManager __instance)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return;
+        if (!HostModGate.FeaturesActive) return;
         try
         {
             Plugin.Log.LogInfo($"[GenerateNewFloor.Post] type={__instance.currentDungeonType} level={__instance.currentLevel?.name} isServer={__instance.IsServer}");
