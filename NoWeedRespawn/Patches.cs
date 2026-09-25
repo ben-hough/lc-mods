@@ -20,6 +20,7 @@ internal static class OutdoorSession
         OutdoorCleared = false;
         AnyDestroyedThisMoon = false;
         DestroyedIndices.Clear();
+        HostModGate.OnSessionReset();
         Plugin.VLog("Outdoor session flags reset.");
     }
 }
@@ -207,7 +208,7 @@ internal static class GenerateMoldPatch
         if (!Plugin.OutdoorActive)
             return true;
 
-        if (OutdoorSession.OutdoorCleared)
+        if (HostModGate.OutdoorClearedSynced)
         {
             Plugin.VLog("Skipped GenerateMold (OutdoorCleared).");
             return false;
@@ -217,7 +218,7 @@ internal static class GenerateMoldPatch
             return true;
 
         OutdoorHelpers.MaybeMarkCleared(__instance);
-        if (OutdoorSession.OutdoorCleared)
+        if (HostModGate.OutdoorClearedSynced)
         {
             Plugin.VLog("Skipped GenerateMold (no living weeds after destroy).");
             return false;
@@ -254,7 +255,14 @@ internal static class StartGamePatch
     private static void Postfix()
     {
         OutdoorSession.Reset();
+        HostModGate.EnsureRegistered();
     }
+}
+
+[HarmonyPatch(typeof(StartOfRound), "Start")]
+internal static class HostModGateStartPatch
+{
+    private static void Postfix() => HostModGate.EnsureRegistered();
 }
 
 internal static class OutdoorHelpers
@@ -281,6 +289,7 @@ internal static class OutdoorHelpers
         {
             OutdoorSession.OutdoorCleared = true;
             Plugin.Log.LogInfo("Outdoor mold fully cleared for this moon; further GenerateMold blocked.");
+            HostModGate.BroadcastState();
         }
     }
 }

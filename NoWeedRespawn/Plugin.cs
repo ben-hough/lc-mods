@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.NoWeedRespawn";
     public const string ModName = "NoWeedRespawn";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.1";
 
     internal static ManualLogSource Log { get; private set; } = null!;
 
@@ -48,8 +48,8 @@ public class Plugin : BaseUnityPlugin
         Log.LogInfo($"{ModName} v{ModVersion} loaded. Host should run this for networked growth RPCs.");
     }
 
-    internal static bool IndoorActive => Enabled.Value && BlockIndoorRespawn.Value;
-    internal static bool OutdoorActive => Enabled.Value && BlockOutdoorRespawn.Value;
+    internal static bool IndoorActive => HostModGate.IndoorActive;
+    internal static bool OutdoorActive => HostModGate.OutdoorActive;
 
     internal static void VLog(string message)
     {
