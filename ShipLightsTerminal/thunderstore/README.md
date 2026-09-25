@@ -1,53 +1,37 @@
 # ShipLightsTerminal
 
-Terminal commands to turn the ship lights on, off, or toggle them.
+Terminal commands lights / lightson / lightsoff to control ship lights. Host recommended.
 
-**Website:** [github.com/ben-hough/lc-ship-lights-terminal](https://github.com/ben-hough/lc-ship-lights-terminal)  
-**Game:** Lethal Company v81 (and compatible)
+**Thunderstore:** [MrGlim-ShipLightsTerminal](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipLightsTerminal/)  
+**Source:** [lc-ship-lights-terminal](https://github.com/ben-hough/lc-ship-lights-terminal)  
+**Game:** Lethal Company (BepInEx)
+
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
+
+## Features
+
+- Terminal: `lights` / `lightson` / `lightsoff` / `togglelights`
+- Control ship interior lights without leaving the terminal
 
 ## Install
 
-1. Install BepInEx Pack for Lethal Company.
-2. Drop `ShipLightsTerminal.dll` into `BepInEx/plugins/` (or install via r2modman / Gale).
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install **MrGlim-ShipLightsTerminal** via Thunderstore / r2modman / Gale, or drop `ShipLightsTerminal.dll` into `BepInEx/plugins/`.
 
-## Commands
+Host should run this so light toggles sync for the lobby.
 
-| Command | Action |
-| --- | --- |
-| `lights` / `light` / `ship lights` | Toggle ship lights |
-| `lightson` / `lights on` / `turn on lights` | Turn on |
-| `lightsoff` / `lights off` / `turn off lights` | Turn off |
-| `togglelights` / `toggle lights` | Toggle |
-
-On the real help catalog (STORE / BESTIARY / …) you will also see:
-
-```
->LIGHTS
-Toggle ship lights on/off.
-Also: LIGHTSON / LIGHTSOFF
-```
-
-The first-boot terminal tip does **not** list LIGHTS (by design).
-
-## Behaviour notes
-
-- Calls `ShipLights.SetShipLightsServerRpc` so the state syncs (`RequireOwnership=false`)
-- Falls back to `Object.FindObjectOfType<ShipLights>()` if `StartOfRound.shipRoomLights` is null
-- Reactivates terminal input after a lights command (no blank Enter)
-
-## Config
+## Config (`BepInEx/config/com.benhough.lethal.ShipLightsTerminal.cfg`)
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `Enabled` | true | Master toggle |
-| `VerboseLogging` | false | Trace Parse/OnSubmit/LoadNewNode |
+| `Enabled` | true | Enable lights terminal commands |
+| `VerboseLogging` | false | Log terminal/lights traces |
 
-## Build
+## Changelog
 
-```bash
-dotnet build -c Release
-```
+### 1.0.2
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT

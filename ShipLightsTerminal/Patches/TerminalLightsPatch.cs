@@ -38,6 +38,19 @@ internal static class ManualPatches
 
             Postfix(typeof(Terminal), "Awake", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.AwakePostfix));
             Postfix(typeof(Terminal), "Start", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.StartPostfix));
+            var disc = AccessTools.Method(typeof(GameNetworkManager), "Disconnect");
+            if (disc != null)
+            {
+                harmony.Patch(disc, prefix: new HarmonyMethod(typeof(HostModGateDisconnectPatch), "Prefix"));
+                Plugin.Log.LogInfo("Patched GameNetworkManager.Disconnect for host gate reset");
+            }
+            var sor = AccessTools.Method(typeof(StartOfRound), "Start");
+            if (sor != null)
+            {
+                harmony.Patch(sor, postfix: new HarmonyMethod(typeof(HostModGateStartPatch), "Postfix"));
+                Plugin.Log.LogInfo("Patched StartOfRound.Start for host gate register");
+            }
+
         }
         catch (Exception ex)
         {
@@ -94,7 +107,7 @@ internal static class OnSubmitPatch
             var input = TerminalInput.Extract(__instance);
             TerminalInput.LastSubmitted = input;
             Plugin.Log.LogInfo($"[OnSubmit] captured='{input}' enabled={Plugin.Enabled?.Value}");
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+            if (!HostModGate.FeaturesActive) return true;
 
             if (!TerminalInput.IsLightsCommand(input)) return true;
 
@@ -117,7 +130,7 @@ internal static class ParseWordPatch
 {
     public static bool Prefix(string playerWord, int specificityRequired, ref TerminalKeyword __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var word = TerminalInput.Normalize(playerWord);
@@ -140,7 +153,7 @@ internal static class ParseSentencePatch
 {
     public static bool Prefix(Terminal __instance, ref TerminalNode __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var input = TerminalInput.LastSubmitted;
@@ -178,7 +191,7 @@ internal static class LoadNewNodePatch
 
         try
         {
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+            if (!HostModGate.FeaturesActive)
                 return;
 
             if (!LightActions.TryGetCommandForNode(node, out var cmd))
@@ -223,6 +236,7 @@ internal static class TerminalLifecyclePatch
 
     public static void StartPostfix(Terminal __instance)
     {
+        HostModGate.EnsureRegistered();
         Plugin.Log.LogInfo("[Terminal.Start] postfix hit");
         LightActions.EnsureKeywordsRegistered(__instance);
         LightActions.EnsureHelpText(__instance);
@@ -242,8 +256,7 @@ internal static class LightActions
     private const string HelpFingerprint = ">LIGHTS";
     private const string HelpBlock =
         ">LIGHTS\n" +
-        "Toggle ship lights on/off.\n" +
-        "Also: LIGHTSON / LIGHTSOFF\n\n";
+        "Toggle ship lights (also LIGHTSON / LIGHTSOFF).\n\n";
 
     internal static TerminalNode CreateDisplayNode(string text)
     {
@@ -330,6 +343,9 @@ internal static class LightActions
                 return;
             }
 
+            // Build keyword objects for ParseWord/LoadNewNode, but only publish
+            // "lights" (+ on/off) into allKeywords so help/other does not list
+            // light/lights/togglelights as separate duplicate rows.
             EnsureKeyword("lights");
             EnsureKeyword("light");
             EnsureKeyword("lightson");
@@ -345,15 +361,17 @@ internal static class LightActions
             }
 
             var list = new List<TerminalKeyword>(terminal.terminalNodes.allKeywords);
-            foreach (var kv in Keywords)
+            foreach (var word in new[] { "lights", "lightson", "lightsoff" })
             {
-                if (!list.Exists(k => k != null && k.word == kv.Key))
-                    list.Add(kv.Value);
+                if (!Keywords.TryGetValue(word, out var kw) || kw == null)
+                    continue;
+                if (!list.Exists(k => k != null && k.word == word))
+                    list.Add(kw);
             }
 
             terminal.terminalNodes.allKeywords = list.ToArray();
             _registered = true;
-            Plugin.Log.LogInfo($"Registered lights keywords (allKeywords={list.Count}, trackedNodes={NodeCommands.Count})");
+            Plugin.Log.LogInfo($"Registered lights keywords (allKeywords={list.Count}, published=lights/lightson/lightsoff, trackedNodes={NodeCommands.Count})");
         }
         catch (Exception ex)
         {
@@ -623,4 +641,10 @@ internal static class LightActions
 
         return wantOn ? "Ship lights are now ON.\n" : "Ship lights are now OFF.\n";
     }
+}
+
+
+internal static class HostModGateStartPatch
+{
+    public static void Postfix() => HostModGate.EnsureRegistered();
 }
