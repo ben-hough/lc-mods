@@ -38,6 +38,19 @@ internal static class ManualPatches
 
             Postfix(typeof(Terminal), "Awake", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.AwakePostfix));
             Postfix(typeof(Terminal), "Start", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.StartPostfix));
+            var disc = AccessTools.Method(typeof(GameNetworkManager), "Disconnect");
+            if (disc != null)
+            {
+                harmony.Patch(disc, prefix: new HarmonyMethod(typeof(HostModGateDisconnectPatch), "Prefix"));
+                Plugin.Log.LogInfo("Patched GameNetworkManager.Disconnect for host gate reset");
+            }
+            var sor = AccessTools.Method(typeof(StartOfRound), "Start");
+            if (sor != null)
+            {
+                harmony.Patch(sor, postfix: new HarmonyMethod(typeof(HostModGateStartPatch), "Postfix"));
+                Plugin.Log.LogInfo("Patched StartOfRound.Start for host gate register");
+            }
+
         }
         catch (Exception ex)
         {
@@ -74,10 +87,11 @@ internal static class TerminalInput
         catch { return ""; }
     }
 
+    // Do NOT include "teleporter" — that is the vanilla store buy noun.
     private static readonly HashSet<string> Commands = new(StringComparer.Ordinal)
     {
-        "teleport", "tp", "beam", "teleporter", "ship teleport",
-        "iteleport", "itp", "inverse", "inverse teleport", "inverse teleporter",
+        "teleport", "tp", "beam", "ship teleport",
+        "iteleport", "itp", "inverse teleport",
         "teleport inverse", "tp inverse",
     };
 
@@ -93,7 +107,7 @@ internal static class OnSubmitPatch
             var input = TerminalInput.Extract(__instance);
             TerminalInput.LastSubmitted = input;
             Plugin.Log.LogInfo($"[OnSubmit] captured='{input}' enabled={Plugin.Enabled?.Value}");
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+            if (!HostModGate.FeaturesActive) return true;
 
             if (!TerminalInput.IsTeleportCommand(input)) return true;
 
@@ -116,7 +130,7 @@ internal static class ParseWordPatch
 {
     public static bool Prefix(string playerWord, int specificityRequired, ref TerminalKeyword __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var word = TerminalInput.Normalize(playerWord);
@@ -139,7 +153,7 @@ internal static class ParseSentencePatch
 {
     public static bool Prefix(Terminal __instance, ref TerminalNode __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var input = TerminalInput.LastSubmitted;
@@ -177,7 +191,7 @@ internal static class LoadNewNodePatch
 
         try
         {
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+            if (!HostModGate.FeaturesActive)
                 return;
 
             if (!TeleportActions.TryGetCommandForNode(node, out var cmd))
@@ -222,6 +236,7 @@ internal static class TerminalLifecyclePatch
 
     public static void StartPostfix(Terminal __instance)
     {
+        HostModGate.EnsureRegistered();
         Plugin.Log.LogInfo("[Terminal.Start] postfix hit");
         TeleportActions.EnsureKeywordsRegistered(__instance);
         TeleportActions.EnsureHelpText(__instance);
@@ -337,13 +352,12 @@ internal static class TeleportActions
             
             
 
+            // Never register "teleporter" — conflicts with store buy.
             EnsureKeyword("teleport");
             EnsureKeyword("tp");
             EnsureKeyword("beam");
-            EnsureKeyword("teleporter");
             EnsureKeyword("iteleport");
             EnsureKeyword("itp");
-            EnsureKeyword("inverse");
 
             if (_registered)
             {
@@ -352,15 +366,17 @@ internal static class TeleportActions
             }
 
             var list = new List<TerminalKeyword>(terminal.terminalNodes.allKeywords);
-            foreach (var kv in Keywords)
+            foreach (var word in new[] { "teleport", "tp", "beam", "iteleport", "itp" })
             {
-                if (!list.Exists(k => k != null && k.word == kv.Key))
-                    list.Add(kv.Value);
+                if (!Keywords.TryGetValue(word, out var kw) || kw == null)
+                    continue;
+                if (!list.Exists(k => k != null && k.word == word))
+                    list.Add(kw);
             }
 
             terminal.terminalNodes.allKeywords = list.ToArray();
             _registered = true;
-            Plugin.Log.LogInfo($"Registered teleport keywords (allKeywords={list.Count}, trackedNodes={NodeCommands.Count})");
+            Plugin.Log.LogInfo($"Registered teleport keywords (allKeywords={list.Count}, published=teleport/tp/beam/iteleport/itp, trackedNodes={NodeCommands.Count})");
         }
         catch (Exception ex)
         {
@@ -533,9 +549,9 @@ internal static class TeleportActions
     {
         return input switch
         {
-            "teleport" or "tp" or "beam" or "teleporter" or "ship teleport"
+            "teleport" or "tp" or "beam" or "ship teleport"
                 => Fire(inverse: false),
-            "iteleport" or "itp" or "inverse" or "inverse teleport" or "inverse teleporter"
+            "iteleport" or "itp" or "inverse teleport"
                 or "teleport inverse" or "tp inverse"
                 => Fire(inverse: true),
             _ => "Unknown teleport command.\n",
@@ -633,4 +649,10 @@ internal static class TeleportActions
             ? "Inverse teleporter activated.\n"
             : "Teleporter activated (radar target).\n";
     }
+}
+
+
+internal static class HostModGateStartPatch
+{
+    public static void Postfix() => HostModGate.EnsureRegistered();
 }
