@@ -68,7 +68,7 @@ internal static class DropHeldItemsPatches
 
     private static bool ShouldKeepItems(PlayerControllerB player, bool disconnecting, string source)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+        if (!HostModGate.FeaturesActive)
             return false;
 
         if (player == null)
@@ -93,8 +93,8 @@ internal static class DropHeldItemsPatches
             return false;
 
         var keep = isInverse
-            ? Plugin.KeepOnInverseTeleporter.Value
-            : Plugin.KeepOnNormalTeleporter.Value;
+            ? HostModGate.KeepOnInverse
+            : HostModGate.KeepOnNormal;
 
         if (!keep)
         {
@@ -121,5 +121,14 @@ internal static class DropHeldItemsPatches
         }
 
         return false;
+    }
+}
+
+[HarmonyPatch(typeof(StartOfRound), "Start")]
+internal static class HostModGateStartPatch
+{
+    private static void Postfix()
+    {
+        HostModGate.EnsureRegistered();
     }
 }

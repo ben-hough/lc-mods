@@ -1,38 +1,40 @@
 # KeepItemsOnTeleport
 
-Keep your held/inventory items when the ship teleporter beams you.
+Keep inventory items when beamed by the ship teleporter (normal and inverse). Host recommended.
 
 **Thunderstore:** [MrGlim-KeepItemsOnTeleport](https://thunderstore.io/c/lethal-company/p/MrGlim/KeepItemsOnTeleport/)  
-**Game:** Lethal Company v81 (and compatible)
+**Source:** [lc-keep-items-on-teleport](https://github.com/ben-hough/lc-keep-items-on-teleport)  
+**Game:** Lethal Company (BepInEx)
 
-## What it does
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
 
-- **Normal teleporter** (facility → ship): items stay in your slots
-- **Inverse teleporter** (ship → facility): items stay in your slots
-- Death / disconnect still drops items as vanilla
+## Features
+
+- Prevents inventory drop on ship teleporter beam-in
+- Works for normal and inverse teleporters (configurable)
+- Lightweight Harmony patch — no new items or UI
 
 ## Install
 
-1. Install BepInEx Pack for Lethal Company.
-2. Drop `KeepItemsOnTeleport.dll` into `BepInEx/plugins/` (or install via Thunderstore Mod Manager / Gale).
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install **MrGlim-KeepItemsOnTeleport** via Thunderstore / r2modman / Gale, or drop `KeepItemsOnTeleport.dll` into `BepInEx/plugins/`.
 
-**Lobby note:** everyone in the lobby should run this mod (teleport inventory is synced).
+Host should run this so item retention applies for teleported players.
 
 ## Config (`BepInEx/config/com.benhough.lethal.KeepItemsOnTeleport.cfg`)
 
 | Key | Default | Notes |
 | --- | --- | --- |
 | `Enabled` | true | Master toggle |
-| `KeepOnNormalTeleporter` | true | Keep items when beamed to the ship |
-| `KeepOnInverseTeleporter` | true | Keep items when beamed into the facility |
-| `VerboseLogging` | false | Log skipped drops |
+| `KeepOnNormalTeleporter` | true | Keep items on normal TP |
+| `KeepOnInverseTeleporter` | true | Keep items on inverse TP |
+| `VerboseLogging` | false | Log when a drop is skipped |
 
-## Build
+## Changelog
 
-```bash
-dotnet build -c Release
-```
+### 1.0.1
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT

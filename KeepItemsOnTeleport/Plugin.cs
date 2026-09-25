@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.KeepItemsOnTeleport";
     public const string ModName = "KeepItemsOnTeleport";
-    public const string ModVersion = "1.0.0";
+    public const string ModVersion = "1.0.1";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
