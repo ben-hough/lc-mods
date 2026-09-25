@@ -130,12 +130,12 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             {
                 _label.font = font;
                 _fontAssigned = true;
-                Plugin.Log.LogInfo(string.Format("ShipBeacon TMP font assigned: {0}", font.name));
+                Plugin.Log.LogInfo($"ShipBeacon TMP font assigned: {font.name}");
             }
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning(string.Format("ShipBeacon font assign failed: {0}", ex.Message));
+            Plugin.Log.LogWarning($"ShipBeacon font assign failed: {ex.Message}");
         }
     }
 
@@ -188,7 +188,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Plugin.Log.LogWarning(string.Format("ApplyClockStyle: {0}", ex.Message));
+            Plugin.Log.LogWarning($"ApplyClockStyle: {ex.Message}");
             try { _label.color = ClockOrange; } catch { /* ignore */ }
         }
     }
@@ -207,15 +207,17 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             _nextHeartbeat = Time.unscaledTime + 10f;
             var start = StartOfRound.Instance;
             var player = GameNetworkManager.Instance?.localPlayerController;
-            Plugin.Log.LogInfo(string.Format(
-                "[Heartbeat] enabled={0}, canvas={1}, canvasOn={2}, font={3}, hide='{4}', detail='{5}', inShipPhase={6}, playerNull={7}, dead={8}, insideFactory={9}, inShip={10}",
-                Plugin.Enabled.Value, _canvas != null, _canvas?.enabled, _fontAssigned, _lastHideReason, _lastBeaconDetail,
-                start?.inShipPhase, player == null, player?.isPlayerDead, player?.isInsideFactory, player?.isInHangarShipRoom));
+            Plugin.Log.LogInfo(
+                $"[Heartbeat] featuresActive={HostModGate.FeaturesActive}, canvas={_canvas != null}, canvasOn={_canvas?.enabled}, " +
+                $"font={_fontAssigned}, hide='{_lastHideReason}', detail='{_lastBeaconDetail}', " +
+                $"inShipPhase={start?.inShipPhase}, playerNull={player == null}, dead={player?.isPlayerDead}, " +
+                $"insideFactory={player?.isInsideFactory}, inShip={player?.isInHangarShipRoom}");
         }
 
         // Don't use Plugin.Instance == null — BaseUnityPlugin is a UnityEngine.Object and
         // Unity's overloaded == can fake-null a live plugin and permanently hide the HUD.
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+        HostModGate.EnsureRegistered();
+        if (!HostModGate.FeaturesActive)
         {
             SetVisible(false);
             _lastHideReason = "disabled";
@@ -245,12 +247,12 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
             SetVisible(true);
             _lastHideReason = "";
-            _lastBeaconDetail = string.Format("{0:0}m bearing={1:0}", distance, angleDeg);
+            _lastBeaconDetail = $"{distance:0}m bearing={angleDeg:0}";
 
             if (!_loggedVisible)
             {
                 _loggedVisible = true;
-                Plugin.Log.LogInfo(string.Format("ShipBeacon visible: {0:0}m, bearing {1:0} deg.", distance, angleDeg));
+                Plugin.Log.LogInfo($"ShipBeacon visible: {distance:0}m, bearing {angleDeg:0} deg.");
             }
         }
         catch (Exception ex)
@@ -281,7 +283,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
 
         _nextDebugLog = Time.unscaledTime + 8f;
         if (!string.IsNullOrEmpty(reason))
-            Plugin.Log.LogInfo(string.Format("ShipBeacon hidden: {0}", reason));
+            Plugin.Log.LogInfo($"ShipBeacon hidden: {reason}");
     }
 
     private static bool TryGetBeacon(out float signedAngleDeg, out float distance, out string hideReason)
@@ -340,7 +342,7 @@ internal sealed class ShipBeaconHud : MonoBehaviour
             distance = flat.magnitude;
             if (distance < 0.5f)
             {
-                hideReason = string.Format("too close ({0:0.0}m)", distance);
+                hideReason = $"too close ({distance:0.0}m)";
                 return false;
             }
 
@@ -408,16 +410,16 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         // SignedAngle: negative = ship is left of view, positive = right.
         var abs = Mathf.Abs(signedAngleDeg);
         string body = Plugin.ShowDistance.Value
-            ? string.Format("SHIP  {0:0}m", distance)
+            ? $"SHIP  {distance:0}m"
             : "SHIP";
 
         // Straight ahead: caret arrows on both sides.
         if (abs <= 25f)
-            return string.Format("^  {0}  ^", body);
+            return $"^  {body}  ^";
 
         // Mostly behind: down carets.
         if (abs >= 155f)
-            return string.Format("v  {0}  v", body);
+            return $"v  {body}  v";
 
         // Side: chevrons only on the pointing side; count grows with turn.
         var count = 1;
@@ -426,8 +428,8 @@ internal sealed class ShipBeaconHud : MonoBehaviour
         if (abs > 100f) count = 4;
 
         if (signedAngleDeg < 0f)
-            return string.Format("{0}  {1}", new string('<', count), body);
+            return $"{new string('<', count)}  {body}";
 
-        return string.Format("{0}  {1}", body, new string('>', count));
+        return $"{body}  {new string('>', count)}";
     }
 }

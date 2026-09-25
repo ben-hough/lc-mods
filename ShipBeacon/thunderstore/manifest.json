@@ -1,8 +1,8 @@
 {
   "name": "ShipBeacon",
-  "version_number": "1.0.12",
+  "version_number": "1.0.14",
   "website_url": "https://github.com/ben-hough/lc-ship-beacon",
-  "description": "Outdoor HUD ship direction + distance. Orange clock-style text.",
+  "description": "Outdoor HUD ship direction and distance in orange clock-style text. Pure client-side QoL.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.13
+- Nudged beacon text down (default `VerticalOffset` 0.06)
+
 ## 1.0.12
 - Moved beacon to a fixed bottom position (default `VerticalOffset` 0.10) so it no longer sits in the clock area
 - Center pivot / alignment for stable placement across moons
@@ -10,6 +13,9 @@
 - Font size ~92% of clock size
 
 # Changelog
+
+## 1.0.13
+- Nudged beacon text down (default `VerticalOffset` 0.06)
 
 ## 1.0.12
 - Moved beacon to a fixed bottom position (default `VerticalOffset` 0.10) so it no longer sits in the clock area

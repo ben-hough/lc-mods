@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipBeacon";
     public const string ModName = "ShipBeacon";
-    public const string ModVersion = "1.0.12";
+    public const string ModVersion = "1.0.14";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -35,7 +35,7 @@ public class Plugin : BaseUnityPlugin
         VerticalOffset = Config.Bind(
             "General",
             "VerticalOffset",
-            0.10f,
+            0.06f,
             "Beacon text vertical position (0 = bottom, 1 = top). Default sits near the bottom of the screen.");
         MatchClockStyle = Config.Bind(
             "General",

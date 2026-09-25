@@ -9,6 +9,7 @@ internal static class StartOfRoundStartPatch
     private static void Postfix()
     {
         ShipBeaconHud.EnsureExists();
+        HostModGate.EnsureRegistered();
         Plugin.Log.LogInfo("ShipBeacon HUD ensured after StartOfRound.Start.");
     }
 }
@@ -19,5 +20,6 @@ internal static class HudManagerStartPatch
     private static void Postfix()
     {
         ShipBeaconHud.EnsureExists();
+        HostModGate.EnsureRegistered();
     }
 }
