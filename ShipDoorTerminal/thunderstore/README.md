@@ -1,52 +1,38 @@
 # ShipDoorTerminal
 
-Terminal commands to open, close, or toggle the ship hangar doors.
+Terminal commands door / opendoor / closedoor for the ship hangar doors. Host recommended.
 
 **Thunderstore:** [MrGlim-ShipDoorTerminal](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipDoorTerminal/)  
-**Game:** Lethal Company v81 (and compatible)
+**Source:** [lc-ship-door-terminal](https://github.com/ben-hough/lc-ship-door-terminal)  
+**Game:** Lethal Company (BepInEx)
+
+> **Networking:** Host should install this mod so gameplay changes sync for the lobby.
+
+## Features
+
+- Terminal: `door` / `doors` / `opendoor` / `closedoor`
+- Toggles or forces ship hangar door state from the terminal
+- Lightweight — no new assets
 
 ## Install
 
-1. Install BepInEx Pack for Lethal Company.
-2. Drop `ShipDoorTerminal.dll` into `BepInEx/plugins/` (or install via r2modman / Gale).
+1. Install [BepInEx Pack](https://thunderstore.io/c/lethal-company/p/BepInEx/BepInExPack/) for Lethal Company.
+2. Install **MrGlim-ShipDoorTerminal** via Thunderstore / r2modman / Gale, or drop `ShipDoorTerminal.dll` into `BepInEx/plugins/`.
 
-## Commands
+Host should run this so door commands sync for the lobby.
 
-| Command | Action |
-| --- | --- |
-| `door` / `doors` | Toggle hangar doors |
-| `opendoor` | Open |
-| `closedoor` | Close |
-
-On the real help catalog (STORE / BESTIARY / …) you will also see:
-
-```
->DOOR
-Toggle the ship hangar doors.
-Also: OPENDOOR / CLOSEDOOR
-```
-
-The first-boot terminal tip does **not** list DOOR (by design).
-
-## Behaviour notes
-
-- Uses hangar Start/Stop button interact path with RPC fallback
-- Reactivates terminal input after a door command (no blank Enter)
-- **Blocked while in orbit** (`inShipPhase`) with a clear terminal message
-
-## Config
+## Config (`BepInEx/config/com.benhough.lethal.ShipDoorTerminal.cfg`)
 
 | Key | Default | Notes |
 | --- | --- | --- |
-| `Enabled` | true | Master toggle |
-| `VerboseLogging` | true | Trace Parse/OnSubmit/LoadNewNode |
+| `Enabled` | true | Enable door terminal commands |
+| `VerboseLogging` | true | Log terminal/door traces |
 
-## Build
+## Changelog
 
-```bash
-dotnet build -c Release
-```
+### 1.0.11
+- Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT

@@ -1,8 +1,8 @@
 {
   "name": "ShipDoorTerminal",
-  "version_number": "1.0.10",
+  "version_number": "1.0.11",
   "website_url": "https://github.com/ben-hough/lc-ship-door-terminal",
-  "description": "Terminal commands door / opendoor / closedoor for the ship hangar doors.",
+  "description": "Terminal commands door / opendoor / closedoor for the ship hangar doors. Host recommended.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]

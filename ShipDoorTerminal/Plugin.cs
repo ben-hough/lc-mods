@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipDoorTerminal";
     public const string ModName = "ShipDoorTerminal";
-    public const string ModVersion = "1.0.10";
+    public const string ModVersion = "1.0.11";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -30,6 +30,7 @@ public class Plugin : BaseUnityPlugin
             "Log terminal/door traces.");
 
         ManualPatches.Apply(_harmony);
+        _harmony.PatchAll(typeof(HostModGateDisconnectPatch));
         Log.LogInfo($"{ModName} v{ModVersion} loaded. Verbose={Verbose.Value}");
     }
 

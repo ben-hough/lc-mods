@@ -40,6 +40,19 @@ internal static class ManualPatches
 
             Postfix(typeof(Terminal), "Awake", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.AwakePostfix));
             Postfix(typeof(Terminal), "Start", typeof(TerminalLifecyclePatch), nameof(TerminalLifecyclePatch.StartPostfix));
+            var disc = AccessTools.Method(typeof(GameNetworkManager), "Disconnect");
+            if (disc != null)
+            {
+                harmony.Patch(disc, prefix: new HarmonyMethod(typeof(HostModGateDisconnectPatch), "Prefix"));
+                Plugin.Log.LogInfo("Patched GameNetworkManager.Disconnect for host gate reset");
+            }
+            var sor = AccessTools.Method(typeof(StartOfRound), "Start");
+            if (sor != null)
+            {
+                harmony.Patch(sor, postfix: new HarmonyMethod(typeof(HostModGateStartPatch), "Postfix"));
+                Plugin.Log.LogInfo("Patched StartOfRound.Start for host gate register");
+            }
+
         }
         catch (Exception ex)
         {
@@ -95,7 +108,7 @@ internal static class OnSubmitPatch
             var input = TerminalInput.Extract(__instance);
             TerminalInput.LastSubmitted = input;
             Plugin.Log.LogInfo($"[OnSubmit] captured='{input}' enabled={Plugin.Enabled?.Value}");
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+            if (!HostModGate.FeaturesActive) return true;
 
             if (!TerminalInput.IsDoorCommand(input)) return true;
 
@@ -118,7 +131,7 @@ internal static class ParseWordPatch
 {
     public static bool Prefix(string playerWord, int specificityRequired, ref TerminalKeyword __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var word = TerminalInput.Normalize(playerWord);
@@ -141,7 +154,7 @@ internal static class ParseSentencePatch
 {
     public static bool Prefix(Terminal __instance, ref TerminalNode __result)
     {
-        if (Plugin.Enabled == null || !Plugin.Enabled.Value) return true;
+        if (!HostModGate.FeaturesActive) return true;
         try
         {
             var input = TerminalInput.LastSubmitted;
@@ -179,7 +192,7 @@ internal static class LoadNewNodePatch
 
         try
         {
-            if (Plugin.Enabled == null || !Plugin.Enabled.Value)
+            if (!HostModGate.FeaturesActive)
                 return;
 
             if (!DoorActions.TryGetCommandForNode(node, out var cmd))
@@ -224,6 +237,7 @@ internal static class TerminalLifecyclePatch
 
     public static void StartPostfix(Terminal __instance)
     {
+        HostModGate.EnsureRegistered();
         Plugin.Log.LogInfo("[Terminal.Start] postfix hit");
         DoorActions.EnsureKeywordsRegistered(__instance);
         DoorActions.EnsureHelpText(__instance);
@@ -649,4 +663,10 @@ internal static class DoorActions
             return false;
         }
     }
+}
+
+
+internal static class HostModGateStartPatch
+{
+    public static void Postfix() => HostModGate.EnsureRegistered();
 }
