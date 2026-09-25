@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.UnbreakableSurfaces";
     public const string ModName = "UnbreakableSurfaces";
-    public const string ModVersion = "1.0.1";
+    public const string ModVersion = "1.0.2";
 
     internal static ManualLogSource Log { get; private set; } = null!;
     internal static ConfigEntry<bool> Enabled { get; private set; } = null!;

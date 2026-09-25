@@ -30,18 +30,18 @@ internal static class BridgePatches
     [HarmonyPatch(nameof(BridgeTrigger.BridgeFallServerRpc))]
     [HarmonyPrefix]
     private static bool BlockFallServer()
-        => !(Plugin.Enabled.Value && Plugin.Bridges.Value);
+        => !HostModGate.BridgesActive;
 
     [HarmonyPatch(nameof(BridgeTrigger.BridgeFallClientRpc))]
     [HarmonyPrefix]
     private static bool BlockFallClient()
-        => !(Plugin.Enabled.Value && Plugin.Bridges.Value);
+        => !HostModGate.BridgesActive;
 
     [HarmonyPatch("LateUpdate")]
     [HarmonyPostfix]
     private static void KeepStanding(BridgeTrigger __instance)
     {
-        if (!Plugin.Enabled.Value || !Plugin.Bridges.Value || __instance == null)
+        if (!HostModGate.BridgesActive || __instance == null)
             return;
 
         if (__instance.bridgeDurability < 1f)
@@ -81,13 +81,13 @@ internal static class SurfacePatches
     [HarmonyPatch(nameof(BridgeTriggerType2.AddToBridgeInstabilityServerRpc))]
     [HarmonyPrefix]
     private static bool BlockInstability()
-        => !(Plugin.Enabled.Value && Plugin.BreakableSurfaces.Value);
+        => !HostModGate.SurfacesActive;
 
     [HarmonyPatch(nameof(BridgeTriggerType2.OnTriggerEnter))]
     [HarmonyPostfix]
     private static void ResetInstability(BridgeTriggerType2 __instance)
     {
-        if (!Plugin.Enabled.Value || !Plugin.BreakableSurfaces.Value || __instance == null)
+        if (!HostModGate.SurfacesActive || __instance == null)
             return;
 
         try
@@ -107,4 +107,10 @@ internal static class SurfacePatches
             Plugin.Log.LogError($"Failed to reset BridgeTriggerType2: {ex.Message}");
         }
     }
+}
+
+[HarmonyPatch(typeof(StartOfRound), "Start")]
+internal static class HostModGateStartPatch
+{
+    private static void Postfix() => HostModGate.EnsureRegistered();
 }
