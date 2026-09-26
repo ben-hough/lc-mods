@@ -36,8 +36,12 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="TooManyEmotes">
-      <HintPath>/workspace/refs/TooManyEmotes.dll</HintPath>
+      <HintPath>$(ModRefsDir)TooManyEmotes.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
+  <PropertyGroup>
+    <!-- Non-NuGet reference assemblies (never committed). Default: refs/ at the repository root; override with -p:ModRefsDir=<folder>/ -->
+    <ModRefsDir Condition="'$(ModRefsDir)' == ''">$(MSBuildThisFileDirectory)../refs/</ModRefsDir>
+  </PropertyGroup>
 </Project>

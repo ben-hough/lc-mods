@@ -18,4 +18,4 @@ Everyone who should follow the playlist needs this mod installed.
 
 ## Building
 
-`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `TooManyEmotes.dll` (from [FlipMods-TooManyEmotes](https://thunderstore.io/c/lethal-company/p/FlipMods/TooManyEmotes/)) is not included either: the csproj expects it at `/workspace/refs/TooManyEmotes.dll`. Put a copy there or change the `HintPath` to your r2modman/Gale profile's copy.
+`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `TooManyEmotes.dll` (from [FlipMods-TooManyEmotes](https://thunderstore.io/c/lethal-company/p/FlipMods/TooManyEmotes/)) is not included either: the csproj expects it at `refs/TooManyEmotes.dll` in the repository root (the `ModRefsDir` property). Put a copy there, pass `-p:ModRefsDir=<folder>/` pointing at your r2modman/Gale profile's plugin folder, or change the `HintPath`.

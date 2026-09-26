@@ -63,4 +63,4 @@ MIT
 
 ## Building
 
-`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `OpenBodyCams.dll` (from [Zaggy1024-OpenBodyCams](https://thunderstore.io/c/lethal-company/p/Zaggy1024/OpenBodyCams/)) is not included either: the csproj expects it at `/workspace/refs/OpenBodyCams/OpenBodyCams.dll`. Put a copy there or change the `HintPath` to your r2modman/Gale profile's copy.
+`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `OpenBodyCams.dll` (from [Zaggy1024-OpenBodyCams](https://thunderstore.io/c/lethal-company/p/Zaggy1024/OpenBodyCams/)) is not included either: the csproj expects it at `refs/OpenBodyCams/OpenBodyCams.dll` in the repository root (the `ModRefsDir` property). Put a copy there, pass `-p:ModRefsDir=<folder>/` pointing at your r2modman/Gale profile's plugin folder, or change the `HintPath`.
