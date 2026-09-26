@@ -1,0 +1,9 @@
+{
+  "name": "MapClickCodes",
+  "version_number": "1.0.11",
+  "website_url": "https://github.com/ben-hough/lc-map-click-codes",
+  "description": "Click code markers on the main ship radar to activate terminal codes (doors, turrets, mines, traps).",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}
