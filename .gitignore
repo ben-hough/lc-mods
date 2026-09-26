@@ -1,0 +1,45 @@
+# Build output
+bin/
+obj/
+[Bb]uild/
+[Rr]elease/
+[Dd]ebug/
+*.dll
+*.pdb
+*.exe
+*.nupkg
+
+# Release archives
+*.zip
+*.7z
+*.rar
+*.tar.gz
+dist/
+share/
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Tokens and secrets
+.env
+.env.*
+*.token
+*token*.txt
+secrets.*
+*.secret
+*.pem
+*.pfx
+*.p12
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
