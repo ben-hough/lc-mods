@@ -1,7 +1,7 @@
 {
   "name": "CadaverWilt",
   "version_number": "1.0.2",
-  "website_url": "https://github.com/ben-hough/lc-cadaver-wilt",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/CadaverWilt",
   "description": "When a Cadaver Growth patch is fully sprayed away, its bloom enemies wilt and die. Host recommended.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

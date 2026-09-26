@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "UnbreakableSurfaces"
 versionNumber = "1.0.2"
 description = "Bridges and unstable platforms never collapse. Host should run it for synced surfaces."
-websiteUrl = "https://github.com/ben-hough/lc-unbreakable-surfaces"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/UnbreakableSurfaces"
 containsNsfwContent = false
 
 [package.dependencies]

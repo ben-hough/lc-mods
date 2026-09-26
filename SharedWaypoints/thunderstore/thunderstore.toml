@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "SharedWaypoints"
 versionNumber = "1.0.4"
 description = "Shared HUD + ship radar/map waypoints. Indoor/outdoor aware; F8 drop, F7 clear. Host syncs markers."
-websiteUrl = "https://github.com/ben-hough/lc-shared-waypoints"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/SharedWaypoints"
 containsNsfwContent = false
 
 [package.dependencies]

@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "WeedKillerRefill"
 versionNumber = "1.0.10"
 description = "Refill an empty weed killer can with R (configurable). Syncs tank charge across the lobby."
-websiteUrl = "https://github.com/ben-hough/lc-weed-killer-refill"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/WeedKillerRefill"
 containsNsfwContent = false
 
 [package.dependencies]

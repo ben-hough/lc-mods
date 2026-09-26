@@ -3,7 +3,7 @@
 Loop TooManyEmotes quick-slot remotes on a shared cycle. Press E to sync into the playlist.
 
 **Thunderstore:** [MrGlim-EmotePlaylist](https://thunderstore.io/c/lethal-company/p/MrGlim/EmotePlaylist/)  
-**Source:** [lc-emote-playlist](https://github.com/ben-hough/lc-emote-playlist)  
+**Source:** [lc-mods/EmotePlaylist](https://github.com/ben-hough/lc-mods/tree/main/EmotePlaylist)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Requires TooManyEmotes; install on clients who want to join the playlist.

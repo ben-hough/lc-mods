@@ -1,7 +1,7 @@
 {
   "name": "ShipLightsTerminal",
   "version_number": "1.0.2",
-  "website_url": "https://github.com/ben-hough/lc-ship-lights-terminal",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/ShipLightsTerminal",
   "description": "Terminal commands lights / lightson / lightsoff to control ship lights. Host recommended.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

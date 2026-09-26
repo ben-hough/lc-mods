@@ -3,7 +3,7 @@
 When a Cadaver Growth patch is fully sprayed away, its bloom enemies wilt and die. Host recommended.
 
 **Thunderstore:** [MrGlim-CadaverWilt](https://thunderstore.io/c/lethal-company/p/MrGlim/CadaverWilt/)  
-**Source:** [lc-cadaver-wilt](https://github.com/ben-hough/lc-cadaver-wilt)  
+**Source:** [lc-mods/CadaverWilt](https://github.com/ben-hough/lc-mods/tree/main/CadaverWilt)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

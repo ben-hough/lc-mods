@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "CrewMonitors"
 versionNumber = "1.0.32"
 description = "4-panel crew OpenBodyCams stack: body/map/external cycle, click-to-focus radar, OBC-matched screens."
-websiteUrl = "https://github.com/ben-hough/lc-crew-monitors"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/CrewMonitors"
 containsNsfwContent = false
 
 [package.dependencies]

@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "NoWeedRespawn"
 versionNumber = "1.0.1"
 description = "Cleared weeds, mold, and cadaver plants stay gone for the rest of the moon. Host should run it."
-websiteUrl = "https://github.com/ben-hough/lc-no-weed-respawn"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/NoWeedRespawn"
 containsNsfwContent = false
 
 [package.dependencies]

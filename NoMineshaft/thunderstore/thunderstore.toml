@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "NoMineshaft"
 versionNumber = "1.0.7"
 description = "Removes Mineshaft interiors from dungeon rotation. Host must run this for moon generation."
-websiteUrl = "https://github.com/ben-hough/lc-no-mineshaft"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/NoMineshaft"
 containsNsfwContent = false
 
 [package.dependencies]

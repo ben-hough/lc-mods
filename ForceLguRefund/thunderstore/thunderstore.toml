@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "ForceLguRefund"
 versionNumber = "1.0.1"
 description = "Force Late Game Upgrades refund UI on so you can sell back upgrade levels. Companion for malco Lategame_Upgrades."
-websiteUrl = "https://github.com/ben-hough/lc-force-lgu-refund"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/ForceLguRefund"
 containsNsfwContent = false
 
 [package.dependencies]

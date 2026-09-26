@@ -3,7 +3,7 @@
 Terminal TELEPORT/TP (and ITELEPORT/ITP) to fire the ship teleporter. Host recommended.
 
 **Thunderstore:** [MrGlim-ShipTeleportTerminal](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipTeleportTerminal/)  
-**Source:** [lc-ship-teleport-terminal](https://github.com/ben-hough/lc-ship-teleport-terminal)  
+**Source:** [lc-mods/ShipTeleportTerminal](https://github.com/ben-hough/lc-mods/tree/main/ShipTeleportTerminal)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

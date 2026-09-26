@@ -1,7 +1,7 @@
 {
   "name": "NoWeedRespawn",
   "version_number": "1.0.1",
-  "website_url": "https://github.com/ben-hough/lc-no-weed-respawn",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/NoWeedRespawn",
   "description": "Cleared weeds, mold, and cadaver plants stay gone for the rest of the moon. Host should run it.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

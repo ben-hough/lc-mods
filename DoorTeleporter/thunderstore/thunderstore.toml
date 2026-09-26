@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "DoorTeleporter"
 versionNumber = "1.0.2"
 description = "Terminal DOORPORT/DTP teleports you in front of a random main entrance or fire exit. Host recommended."
-websiteUrl = "https://github.com/ben-hough/lc-door-teleporter"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/DoorTeleporter"
 containsNsfwContent = false
 
 [package.dependencies]

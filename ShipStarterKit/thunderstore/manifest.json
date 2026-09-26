@@ -1,7 +1,7 @@
 {
   "name": "ShipStarterKit",
   "version_number": "1.0.0",
-  "website_url": "https://github.com/ben-hough/lc-ship-starter-kit",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/ShipStarterKit",
   "description": "On first load of a save, pile configurable store equipment on the ship floor (belt bags, flashlights, jetpacks, and more).",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "ShipStarterKit"
 versionNumber = "1.0.0"
 description = "On first load of a save, pile configurable store equipment on the ship floor (belt bags, flashlights, jetpacks, and more)."
-websiteUrl = "https://github.com/ben-hough/lc-ship-starter-kit"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/ShipStarterKit"
 containsNsfwContent = false
 
 [package.dependencies]

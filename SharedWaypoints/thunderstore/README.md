@@ -3,7 +3,7 @@
 Drop shared waypoints for your crew — fixed top-right HUD **and** ship radar / map video feeds (including CrewMonitors map feeds). Indoor/outdoor aware; F8 drop, F7 clear. Host syncs markers.
 
 **Thunderstore:** [MrGlim-SharedWaypoints](https://thunderstore.io/c/lethal-company/p/MrGlim/SharedWaypoints/)  
-**Source:** [lc-shared-waypoints](https://github.com/ben-hough/lc-shared-waypoints)  
+**Source:** [lc-mods/SharedWaypoints](https://github.com/ben-hough/lc-mods/tree/main/SharedWaypoints)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

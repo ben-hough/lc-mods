@@ -1,7 +1,7 @@
 {
   "name": "SprayPatterns",
   "version_number": "0.1.0",
-  "website_url": "https://github.com/ben-hough/lc-spray-patterns",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/SprayPatterns",
   "description": "Overwatch-style spray pattern stamps for the spray can: radial select, preview, rotate, synced stamps. Vanilla free-paint still available.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

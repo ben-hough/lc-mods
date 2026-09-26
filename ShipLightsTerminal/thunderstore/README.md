@@ -3,7 +3,7 @@
 Terminal commands lights / lightson / lightsoff to control ship lights. Host recommended.
 
 **Thunderstore:** [MrGlim-ShipLightsTerminal](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipLightsTerminal/)  
-**Source:** [lc-ship-lights-terminal](https://github.com/ben-hough/lc-ship-lights-terminal)  
+**Source:** [lc-mods/ShipLightsTerminal](https://github.com/ben-hough/lc-mods/tree/main/ShipLightsTerminal)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

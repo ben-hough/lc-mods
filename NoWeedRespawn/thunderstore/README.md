@@ -3,7 +3,7 @@
 Cleared weeds, mold, and cadaver plants stay gone for the rest of the moon. Host should run it.
 
 **Thunderstore:** [MrGlim-NoWeedRespawn](https://thunderstore.io/c/lethal-company/p/MrGlim/NoWeedRespawn/)  
-**Source:** [lc-no-weed-respawn](https://github.com/ben-hough/lc-no-weed-respawn)  
+**Source:** [lc-mods/NoWeedRespawn](https://github.com/ben-hough/lc-mods/tree/main/NoWeedRespawn)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

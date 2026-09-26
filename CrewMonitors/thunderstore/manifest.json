@@ -1,7 +1,7 @@
 {
   "name": "CrewMonitors",
   "version_number": "1.0.32",
-  "website_url": "https://github.com/ben-hough/lc-crew-monitors",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/CrewMonitors",
   "description": "4-panel crew OpenBodyCams stack: body/map/external cycle, click-to-focus radar, OBC-matched screens.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100",

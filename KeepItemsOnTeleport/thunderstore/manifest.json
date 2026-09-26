@@ -1,7 +1,7 @@
 {
   "name": "KeepItemsOnTeleport",
   "version_number": "1.0.1",
-  "website_url": "https://github.com/ben-hough/lc-keep-items-on-teleport",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/KeepItemsOnTeleport",
   "description": "Keep inventory items when beamed by the ship teleporter (normal and inverse). Host recommended.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

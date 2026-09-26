@@ -3,7 +3,7 @@
 Outdoor HUD ship direction and distance in orange clock-style text. Pure client-side QoL.
 
 **Thunderstore:** [MrGlim-ShipBeacon](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipBeacon/)  
-**Source:** [lc-ship-beacon](https://github.com/ben-hough/lc-ship-beacon)  
+**Source:** [lc-mods/ShipBeacon](https://github.com/ben-hough/lc-mods/tree/main/ShipBeacon)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Client-side HUD — install on each PC that should see the beacon.

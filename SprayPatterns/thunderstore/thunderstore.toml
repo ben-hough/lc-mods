@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "SprayPatterns"
 versionNumber = "0.1.0"
 description = "Overwatch-style spray pattern stamps for the spray can: radial select, preview, rotate, synced stamps. Vanilla free-paint still available."
-websiteUrl = "https://github.com/ben-hough/lc-spray-patterns"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/SprayPatterns"
 containsNsfwContent = false
 
 [package.dependencies]

@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "ShipLightsTerminal"
 versionNumber = "1.0.2"
 description = "Terminal commands lights / lightson / lightsoff to control ship lights. Host recommended."
-websiteUrl = "https://github.com/ben-hough/lc-ship-lights-terminal"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/ShipLightsTerminal"
 containsNsfwContent = false
 
 [package.dependencies]

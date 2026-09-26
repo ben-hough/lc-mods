@@ -3,7 +3,7 @@
 Refill an empty weed killer can with R (configurable). Syncs tank charge across the lobby.
 
 **Thunderstore:** [MrGlim-WeedKillerRefill](https://thunderstore.io/c/lethal-company/p/MrGlim/WeedKillerRefill/)  
-**Source:** [lc-weed-killer-refill](https://github.com/ben-hough/lc-weed-killer-refill)  
+**Source:** [lc-mods/WeedKillerRefill](https://github.com/ben-hough/lc-mods/tree/main/WeedKillerRefill)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

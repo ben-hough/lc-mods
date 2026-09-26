@@ -1,7 +1,7 @@
 {
   "name": "UnbreakableSurfaces",
   "version_number": "1.0.2",
-  "website_url": "https://github.com/ben-hough/lc-unbreakable-surfaces",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/UnbreakableSurfaces",
   "description": "Bridges and unstable platforms never collapse. Host should run it for synced surfaces.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

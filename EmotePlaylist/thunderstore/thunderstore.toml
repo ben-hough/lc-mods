@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "EmotePlaylist"
 versionNumber = "1.0.3"
 description = "Loop TooManyEmotes quick-slot remotes on a shared cycle. Press E to sync into the playlist."
-websiteUrl = "https://github.com/ben-hough/lc-emote-playlist"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/EmotePlaylist"
 containsNsfwContent = false
 
 [package.dependencies]

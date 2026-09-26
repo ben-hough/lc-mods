@@ -3,7 +3,7 @@
 Terminal commands door / opendoor / closedoor for the ship hangar doors. Host recommended.
 
 **Thunderstore:** [MrGlim-ShipDoorTerminal](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipDoorTerminal/)  
-**Source:** [lc-ship-door-terminal](https://github.com/ben-hough/lc-ship-door-terminal)  
+**Source:** [lc-mods/ShipDoorTerminal](https://github.com/ben-hough/lc-mods/tree/main/ShipDoorTerminal)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

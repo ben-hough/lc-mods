@@ -3,7 +3,7 @@
 Keep inventory items when beamed by the ship teleporter (normal and inverse). Host recommended.
 
 **Thunderstore:** [MrGlim-KeepItemsOnTeleport](https://thunderstore.io/c/lethal-company/p/MrGlim/KeepItemsOnTeleport/)  
-**Source:** [lc-keep-items-on-teleport](https://github.com/ben-hough/lc-keep-items-on-teleport)  
+**Source:** [lc-mods/KeepItemsOnTeleport](https://github.com/ben-hough/lc-mods/tree/main/KeepItemsOnTeleport)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

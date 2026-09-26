@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "ShipDoorTerminal"
 versionNumber = "1.0.11"
 description = "Terminal commands door / opendoor / closedoor for the ship hangar doors. Host recommended."
-websiteUrl = "https://github.com/ben-hough/lc-ship-door-terminal"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/ShipDoorTerminal"
 containsNsfwContent = false
 
 [package.dependencies]

@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "CadaverWilt"
 versionNumber = "1.0.2"
 description = "When a Cadaver Growth patch is fully sprayed away, its bloom enemies wilt and die. Host recommended."
-websiteUrl = "https://github.com/ben-hough/lc-cadaver-wilt"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/CadaverWilt"
 containsNsfwContent = false
 
 [package.dependencies]

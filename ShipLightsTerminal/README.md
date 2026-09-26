@@ -2,7 +2,7 @@
 
 Terminal commands to turn the ship lights on, off, or toggle them.
 
-**Website:** [github.com/ben-hough/lc-ship-lights-terminal](https://github.com/ben-hough/lc-ship-lights-terminal)  
+**Website:** [github.com/ben-hough/lc-mods/tree/main/ShipLightsTerminal](https://github.com/ben-hough/lc-mods/tree/main/ShipLightsTerminal)  
 **Game:** Lethal Company v81 (and compatible)
 
 ## Install

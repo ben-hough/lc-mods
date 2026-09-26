@@ -3,7 +3,7 @@
 Bridges and unstable platforms never collapse. Host should run it for synced surfaces.
 
 **Thunderstore:** [MrGlim-UnbreakableSurfaces](https://thunderstore.io/c/lethal-company/p/MrGlim/UnbreakableSurfaces/)  
-**Source:** [lc-unbreakable-surfaces](https://github.com/ben-hough/lc-unbreakable-surfaces)  
+**Source:** [lc-mods/UnbreakableSurfaces](https://github.com/ben-hough/lc-mods/tree/main/UnbreakableSurfaces)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

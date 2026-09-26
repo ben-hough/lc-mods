@@ -3,7 +3,7 @@
 Removes Mineshaft interiors from dungeon rotation. Host must run this for moon generation.
 
 **Thunderstore:** [MrGlim-NoMineshaft](https://thunderstore.io/c/lethal-company/p/MrGlim/NoMineshaft/)  
-**Source:** [lc-no-mineshaft](https://github.com/ben-hough/lc-no-mineshaft)  
+**Source:** [lc-mods/NoMineshaft](https://github.com/ben-hough/lc-mods/tree/main/NoMineshaft)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

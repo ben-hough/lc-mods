@@ -3,7 +3,7 @@
 Force Late Game Upgrades refund UI on so you can sell back upgrade levels. Companion for malco Lategame_Upgrades.
 
 **Thunderstore:** [MrGlim-ForceLguRefund](https://thunderstore.io/c/lethal-company/p/MrGlim/ForceLguRefund/)  
-**Source:** [lc-force-lgu-refund](https://github.com/ben-hough/lc-force-lgu-refund)  
+**Source:** [lc-mods/ForceLguRefund](https://github.com/ben-hough/lc-mods/tree/main/ForceLguRefund)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

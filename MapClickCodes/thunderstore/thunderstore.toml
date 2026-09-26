@@ -6,7 +6,7 @@ namespace = "MrGlim"
 name = "MapClickCodes"
 versionNumber = "1.0.11"
 description = "Click code markers on the main ship radar to activate terminal codes (doors, turrets, mines, traps)."
-websiteUrl = "https://github.com/ben-hough/lc-map-click-codes"
+websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/MapClickCodes"
 containsNsfwContent = false
 
 [package.dependencies]

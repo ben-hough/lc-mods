@@ -1,7 +1,7 @@
 {
   "name": "WeedKillerRefill",
   "version_number": "1.0.10",
-  "website_url": "https://github.com/ben-hough/lc-weed-killer-refill",
+  "website_url": "https://github.com/ben-hough/lc-mods/tree/main/WeedKillerRefill",
   "description": "Refill an empty weed killer can with R (configurable). Syncs tank charge across the lobby.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"

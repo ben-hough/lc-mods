@@ -3,7 +3,7 @@
 Terminal DOORPORT/DTP teleports you in front of a random main entrance or fire exit. Host recommended.
 
 **Thunderstore:** [MrGlim-DoorTeleporter](https://thunderstore.io/c/lethal-company/p/MrGlim/DoorTeleporter/)  
-**Source:** [lc-door-teleporter](https://github.com/ben-hough/lc-door-teleporter)  
+**Source:** [lc-mods/DoorTeleporter](https://github.com/ben-hough/lc-mods/tree/main/DoorTeleporter)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Host should install this mod so gameplay changes sync for the lobby.

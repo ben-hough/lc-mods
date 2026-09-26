@@ -3,7 +3,7 @@
 Lethal Company BepInEx mod that adds a **fixed 4-panel crew monitor stack** on the ship wall. Each panel shows OpenBodyCams body cams (and map / external views via the cycle button).
 
 **Thunderstore:** [MrGlim-CrewMonitors](https://thunderstore.io/c/lethal-company/p/MrGlim/CrewMonitors/)  
-**Source:** [lc-crew-monitors](https://github.com/ben-hough/lc-crew-monitors)  
+**Source:** [lc-mods/CrewMonitors](https://github.com/ben-hough/lc-mods/tree/main/CrewMonitors)  
 **Game:** Lethal Company (BepInEx)
 
 > **Networking:** Install with OpenBodyCams on **host and clients** for monitor feeds. This is display QoL on top of OpenBodyCams — no extra host-only gate beyond OBC itself.
