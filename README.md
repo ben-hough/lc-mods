@@ -20,7 +20,7 @@ Each folder's full git history was imported from the mod's former standalone rep
 | [ShipDoorTerminal](ShipDoorTerminal/) | 1.0.11 | Terminal commands door / opendoor / closedoor for the ship hangar doors. | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipDoorTerminal/) |
 | [ShipLightsTerminal](ShipLightsTerminal/) | 1.0.2 | Terminal commands lights / lightson / lightsoff to control ship lights. | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipLightsTerminal/) |
 | [ShipStarterKit](ShipStarterKit/) | 1.0.0 | On first load of a save, pile configurable store equipment on the ship floor (belt bags, flashlights, jetpacks, and more). | - |
-| [ShipTeleportTerminal](ShipTeleportTerminal/) | 1.0.2 | Terminal TELEPORT/TP (and ITELEPORT/ITP) to fire the ship teleporter. | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipTeleportTerminal/) |
+| [ShipTeleportTerminal](ShipTeleportTerminal/) | 1.0.3 | Terminal TELEPORT/TP (and ITELEPORT/ITP) to fire the ship teleporter; no cooldown by default. | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/ShipTeleportTerminal/) |
 | [SprayPatterns](SprayPatterns/) | 0.1.0 | Overwatch-style spray pattern stamps for the spray can: radial select, preview, rotate, synced stamps. | - |
 | [UnbreakableSurfaces](UnbreakableSurfaces/) | 1.0.2 | Bridges and unstable platforms never collapse. | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/UnbreakableSurfaces/) |
 | [WeedKillerRefill](WeedKillerRefill/) | 1.0.10 | Refill an empty weed killer can with R (configurable). | [Thunderstore](https://thunderstore.io/c/lethal-company/p/MrGlim/WeedKillerRefill/) |

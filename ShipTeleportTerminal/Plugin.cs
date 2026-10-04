@@ -10,12 +10,13 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.ShipTeleportTerminal";
     public const string ModName = "ShipTeleportTerminal";
-    public const string ModVersion = "1.0.2";
+    public const string ModVersion = "1.0.3";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
     internal static ConfigEntry<bool> Enabled { get; private set; } = null!;
     internal static ConfigEntry<bool> AllowInverse { get; private set; } = null!;
+    internal static ConfigEntry<bool> RemoveCooldown { get; private set; } = null!;
     internal static ConfigEntry<bool> Verbose { get; private set; } = null!;
 
     private readonly Harmony _harmony = new(ModGuid);
@@ -29,6 +30,8 @@ public class Plugin : BaseUnityPlugin
             "Enable terminal commands: teleport / tp (and inverse variants).");
         AllowInverse = Config.Bind("General", "AllowInverse", true,
             "Allow iteleport / itp / inverse for the inverse teleporter.");
+        RemoveCooldown = Config.Bind("General", "RemoveCooldown", true,
+            "When true (default), TELEPORT/TP and inverse commands ignore the ship teleporter cooldown. Set false to keep the vanilla wait.");
         Verbose = Config.Bind("General", "VerboseLogging", false,
             "Log terminal/teleporter traces.");
 

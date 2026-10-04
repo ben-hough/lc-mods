@@ -600,6 +600,20 @@ internal static class TeleportActions
                 : "Ship teleporter not found (is it unlocked/bought?).\n";
         }
 
+        // RemoveCooldown defaults to true when unset so a missing config still means no wait.
+        var removeCooldown = Plugin.RemoveCooldown == null || Plugin.RemoveCooldown.Value;
+        if (removeCooldown)
+        {
+            try
+            {
+                pad.cooldownTime = 0f;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning($"[Teleport] cooldown clear: {ex.Message}");
+            }
+        }
+
         try
         {
             if (pad.cooldownTime > 0f)

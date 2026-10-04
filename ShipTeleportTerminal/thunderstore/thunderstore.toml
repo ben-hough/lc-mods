@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "MrGlim"
 name = "ShipTeleportTerminal"
-versionNumber = "1.0.2"
+versionNumber = "1.0.3"
 description = "Terminal TELEPORT/TP (and ITELEPORT/ITP) to fire the ship teleporter. Host recommended."
 websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/ShipTeleportTerminal"
 containsNsfwContent = false
