@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.CrewMonitors";
     public const string ModName = "CrewMonitors";
-    public const string ModVersion = "1.0.32";
+    public const string ModVersion = "1.0.33";
     public const string OpenBodyCamsGuid = "Zaggy1024.OpenBodyCams";
 
     internal static Plugin Instance { get; private set; } = null!;

@@ -134,10 +134,27 @@ public sealed class CrewMonitorManager : MonoBehaviour
 
         foreach (var slot in _slots)
         {
-            if (!slot.ShowMapFeed || slot.AssignedPlayer == null)
+            if (slot.BodyCam == null)
                 continue;
-            UpdateMapFeedFollow(slot);
-            ApplyMapFeedTextureToMonitor(slot);
+
+            if (slot.ShowMapFeed && slot.AssignedPlayer != null)
+            {
+                UpdateMapFeedFollow(slot);
+                ApplyMapFeedTextureToMonitor(slot);
+                continue;
+            }
+
+            // Radar focus calls SwitchRadarTargetAndSync, and OpenBodyCams retargets every
+            // body cam synced to that map. Put this slot's own player back if that happened.
+            PlayerControllerB? want = slot.AssignedPlayer != null && IsLivingPlayer(slot.AssignedPlayer)
+                ? slot.AssignedPlayer
+                : null;
+            if (slot.BodyCam.CurrentPlayerTarget == want)
+                continue;
+            if (want != null)
+                slot.BodyCam.SetTargetToPlayer(want);
+            else
+                slot.BodyCam.SetTargetToNone();
         }
     }
 
@@ -231,6 +248,9 @@ public sealed class CrewMonitorManager : MonoBehaviour
             }
 
             int matIndex = PickMaterialIndex(renderer);
+            // Clones share SingleScreen's material assets. One slot writing mainTexture
+            // (map feed, body-cam RT) would otherwise change every panel.
+            IsolateScreenMaterial(renderer, matIndex);
             BodyCamComponent bodyCam;
             try
             {
@@ -651,11 +671,14 @@ public sealed class CrewMonitorManager : MonoBehaviour
         clone.hideFlags = HideFlags.None;
         clone.SetActive(true);
 
-        // Strip components that would conflict (existing BodyCam, ManualCameraRenderer, etc.).
+        // Destroy immediately. A deferred Destroy lets a cloned ManualCameraRenderer or
+        // SyncBodyCamToRadarMap run and drive the shared ship radar / every synced body cam.
         foreach (var cam in clone.GetComponentsInChildren<BodyCamComponent>(true))
-            Destroy(cam);
+            DestroyImmediate(cam);
+        foreach (var sync in clone.GetComponentsInChildren<SyncBodyCamToRadarMap>(true))
+            DestroyImmediate(sync);
         foreach (var mcr in clone.GetComponentsInChildren<ManualCameraRenderer>(true))
-            Destroy(mcr);
+            DestroyImmediate(mcr);
 
         // Disable any colliders on the clone so panels do not block the ship.
         foreach (var collider in clone.GetComponentsInChildren<Collider>(true))
@@ -724,6 +747,21 @@ public sealed class CrewMonitorManager : MonoBehaviour
             $"spacing={spacing} xBase={Plugin.GridHorizontalOffset.Value} yBase={Plugin.GridVerticalOffset.Value} yaw={Plugin.GridYawDegrees.Value} " +
             $"{depthInfo}");
         return clone;
+    }
+
+    private static void IsolateScreenMaterial(MeshRenderer renderer, int matIndex)
+    {
+        var mats = renderer.sharedMaterials;
+        if (mats == null || matIndex < 0 || matIndex >= mats.Length || mats[matIndex] == null)
+            return;
+
+        mats = (Material[])mats.Clone();
+        var unique = new Material(mats[matIndex])
+        {
+            name = mats[matIndex].name + " (CrewSlot)"
+        };
+        mats[matIndex] = unique;
+        renderer.sharedMaterials = mats;
     }
 
     private static int PickMaterialIndex(MeshRenderer renderer)
@@ -813,14 +851,20 @@ public sealed class CrewMonitorManager : MonoBehaviour
                     continue;
                 }
 
+                // Prefer the player this slot already has. CycleIndex is only a list
+                // position, so using it first made every cycled panel jump to the same
+                // crewmate when someone joined, left, or the list reordered.
                 PlayerControllerB? cycled = null;
-                if (slot.CycleIndex >= 0 && slot.CycleIndex < players.Count)
-                    cycled = players[slot.CycleIndex];
-                else if (slot.AssignedPlayer != null && IsLivingPlayer(slot.AssignedPlayer))
+                if (slot.AssignedPlayer != null && IsLivingPlayer(slot.AssignedPlayer))
                     cycled = slot.AssignedPlayer;
+                else if (slot.CycleIndex >= 0 && slot.CycleIndex < players.Count)
+                    cycled = players[slot.CycleIndex];
 
                 if (cycled != null)
                 {
+                    int stable = players.IndexOf(cycled);
+                    if (stable >= 0)
+                        slot.CycleIndex = stable;
                     if (slot.ShowMapFeed)
                         ApplyMapFeed(slot, cycled, alwaysShow);
                     else
@@ -1145,7 +1189,7 @@ public sealed class CrewMonitorManager : MonoBehaviour
             cam.transform.rotation = src.transform.rotation;
     }
 
-    private static void ApplyMapFeedTextureToMonitor(CrewSlot slot)
+    private void ApplyMapFeedTextureToMonitor(CrewSlot slot)
     {
         if (slot.MapFeedTexture == null || slot.BodyCam == null)
             return;
@@ -1153,8 +1197,10 @@ public sealed class CrewMonitorManager : MonoBehaviour
         try
         {
             var mat = GetMonitorOnMaterial(slot.BodyCam);
-            if (mat != null)
-                mat.mainTexture = slot.MapFeedTexture;
+            if (mat == null)
+                return;
+            mat = UnshareMonitorOnMaterial(slot, mat);
+            mat.mainTexture = slot.MapFeedTexture;
         }
         catch (Exception ex)
         {
@@ -1192,6 +1238,33 @@ public sealed class CrewMonitorManager : MonoBehaviour
     {
         var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         return typeof(BodyCamComponent).GetField("MonitorOnMaterial", flags)?.GetValue(bodyCam) as Material;
+    }
+
+    /// <summary>
+    /// Map feeds swap MonitorOnMaterial.mainTexture. If two slots still share that material,
+    /// the write shows up on every panel. Clone it onto this slot only.
+    /// </summary>
+    private Material UnshareMonitorOnMaterial(CrewSlot slot, Material mat)
+    {
+        bool shared = false;
+        foreach (var other in _slots)
+        {
+            if (other == slot || other.BodyCam == null)
+                continue;
+            if (GetMonitorOnMaterial(other.BodyCam) == mat)
+            {
+                shared = true;
+                break;
+            }
+        }
+
+        if (!shared)
+            return mat;
+
+        var clone = new Material(mat) { name = mat.name + " Slot" + slot.Index };
+        typeof(BodyCamComponent).GetField("MonitorOnMaterial", BodyCamFlags)?.SetValue(slot.BodyCam, clone);
+        try { slot.BodyCam.UpdateScreenMaterial(); } catch { /* ignore */ }
+        return clone;
     }
 
     /// <summary>

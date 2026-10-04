@@ -27,7 +27,7 @@ Lethal Company BepInEx mod that adds a **fixed 4-panel crew monitor stack** on t
 3. **Cycle button** (bottom-right of each panel): grey bezel cylinder with a white face. Uses the vanilla **hand** cursor. Cycle order per panel:
    - **Off** → player0 **body** → player0 **map** → player1 body → player1 map → … → **External** → Off
 4. **Hover a panel**: transparent cursor (no hand icon clutter). Tooltip shows the player name (and “Map” when on map feed). Tooltip is **hidden** for Off / External.
-5. **Click a panel**: focuses the ship main radar / teleporter target on that panel’s assigned player (`mapScreen.SwitchRadarTargetAndSync`).
+5. **Click a panel**: focuses the ship main radar / teleporter target on that panel’s assigned player (`mapScreen.SwitchRadarTargetAndSync`). The other crew panels keep their own players.
 6. Optional world-space TMP nameplates under each monitor (`ShowNameplates`).
 7. `AlwaysShowMonitors=true` keeps all panel meshes visible; empty / Off slots stay black rather than hiding the frame.
 

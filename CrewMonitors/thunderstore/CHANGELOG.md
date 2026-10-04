@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.33
+
+- Clicking one crew panel to focus the big radar no longer leaves every panel on that player. Each slot keeps its own player; if a radar sync overwrites a body cam, that slot puts its own target back.
+- Each panel gets its own screen material, so one slot's feed texture cannot show up on the others.
+- A cycled panel remembers its player instead of a shared list index, so someone joining or leaving does not pin every cycled monitor to the same crewmate.
+
 ## 1.0.32
 
 - Per-player map feeds use dedicated follower cameras + private RenderTextures (no longer share `mapScreen` RT / radar target). Multiple panels can show different players' maps; main radar / click-to-focus unchanged.
