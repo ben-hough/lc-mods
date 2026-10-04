@@ -58,3 +58,8 @@ This is a convenience over walking to the terminal — treat it as an advantage 
 ## Credits
 
 Ben Hough (MrGlim) — Thunderstore team **MrGlim**.
+
+
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.

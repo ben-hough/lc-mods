@@ -57,6 +57,14 @@ Lethal Company BepInEx mod that adds a **fixed 4-panel crew monitor stack** on t
 2. Install dependency **Zaggy1024-OpenBodyCams** from Thunderstore.
 3. Install **MrGlim-CrewMonitors** via Thunderstore / r2modman / Gale, or drop `CrewMonitors.dll` into `BepInEx/plugins/`.
 
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.
+
 ## License
 
 MIT
+
+## Building
+
+`dotnet build -c Release`. Lethal Company, Unity and BepInEx assemblies come from NuGet reference packages (`LethalCompany.GameLibs.Steam`, `BepInEx.Core`, `UnityEngine.Modules`), so no game DLLs live in this repo. `OpenBodyCams.dll` (from [Zaggy1024-OpenBodyCams](https://thunderstore.io/c/lethal-company/p/Zaggy1024/OpenBodyCams/)) is not included either: the csproj expects it at `refs/OpenBodyCams/OpenBodyCams.dll` in the repository root (the `ModRefsDir` property). Put a copy there, pass `-p:ModRefsDir=<folder>/` pointing at your r2modman/Gale profile's plugin folder, or change the `HintPath`.

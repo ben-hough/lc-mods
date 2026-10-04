@@ -57,6 +57,10 @@ Lethal Company BepInEx mod that adds a **fixed 4-panel crew monitor stack** on t
 2. Install dependency **Zaggy1024-OpenBodyCams** from Thunderstore.
 3. Install **MrGlim-CrewMonitors** via Thunderstore / r2modman / Gale, or drop `CrewMonitors.dll` into `BepInEx/plugins/`.
 
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.
+
 ## License
 
 MIT
