@@ -36,3 +36,15 @@ dotnet build -c Release
 ## License
 
 MIT — see `LICENSE`.
+
+## Changelog
+
+### 1.0.2
+- Fixed multiplayer held-item desync after a ship teleport. Teammates could keep seeing an item in your hand after you had already dropped it, been snared, or died. Keeping items through the beam is unchanged.
+
+### 1.0.1
+- Packaging refresh.
+
+### 1.0.0
+- Initial release.
+

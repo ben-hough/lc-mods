@@ -10,6 +10,12 @@ internal static class TeleportSession
 {
     private static readonly Dictionary<ulong, bool> InverseByPlayer = new();
 
+    /// <summary>
+    /// True while a NotMe drop RPC is applying the owner's already-decided drop.
+    /// Observers must not swallow that call.
+    /// </summary>
+    internal static bool ApplyingRemoteDrop;
+
     internal static void Mark(ulong playerClientId, bool isInverse)
     {
         InverseByPlayer[playerClientId] = isInverse;

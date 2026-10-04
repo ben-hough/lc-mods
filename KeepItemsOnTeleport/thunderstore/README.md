@@ -32,6 +32,9 @@ Host should run this so item retention applies for teleported players.
 
 ## Changelog
 
+### 1.0.2
+- Fixed teammates still seeing an item in your hand after a ship teleport when you no longer had it. Items are still kept through the beam.
+
 ### 1.0.1
 - Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
