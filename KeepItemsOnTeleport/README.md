@@ -33,6 +33,10 @@ Keep your held/inventory items when the ship teleporter beams you.
 dotnet build -c Release
 ```
 
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.
+
 ## License
 
 MIT — see `LICENSE`.

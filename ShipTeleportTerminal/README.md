@@ -21,3 +21,7 @@ By default, terminal teleports ignore the ship teleporter cooldown (`RemoveCoold
 | `AllowInverse` | true | Allow inverse teleporter commands |
 | `RemoveCooldown` | true | Ignore teleporter cooldown for terminal commands |
 | `VerboseLogging` | false | Log terminal/teleporter traces |
+
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.

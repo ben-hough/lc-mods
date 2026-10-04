@@ -39,6 +39,10 @@ Host should run this so teleporter commands sync for the lobby.
 ### 1.0.2
 - Packaging refresh: professional icon, categories (incl. AI Generated), polished README.
 
+## AI disclosure
+
+This mod was made with the help of generative AI. The code and this README were produced with an AI coding agent, directed by the author (MrGlim / Ben Hough). The Thunderstore package is listed in the **AI Generated** category.
+
 ## License
 
 MIT

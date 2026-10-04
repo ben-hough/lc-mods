@@ -10,6 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyMetadata Include="AI_Assisted_Creation" Value="true" />
+    <AssemblyMetadata Include="AI_Model_Vendor" Value="AI coding agent" />
+  </ItemGroup>
+
+
+  <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.21" ExcludeAssets="runtime" />
     <PackageReference Include="HarmonyX" Version="2.10.2" ExcludeAssets="runtime" />
     <PackageReference Include="UnityEngine.Modules" Version="2022.3.62" IncludeAssets="compile" PrivateAssets="all" />

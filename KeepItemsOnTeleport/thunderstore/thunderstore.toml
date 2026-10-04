@@ -4,7 +4,7 @@ schemaVersion = "0.0.1"
 [package]
 namespace = "MrGlim"
 name = "KeepItemsOnTeleport"
-versionNumber = "1.0.1"
+versionNumber = "1.0.2"
 description = "Keep inventory items when beamed by the ship teleporter (normal and inverse). Host recommended."
 websiteUrl = "https://github.com/ben-hough/lc-mods/tree/main/KeepItemsOnTeleport"
 containsNsfwContent = false
