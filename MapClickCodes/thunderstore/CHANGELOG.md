@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.12
+
+- **Ship monitor hit test matches the picture.** The radar image is only `Cube.001` submesh 1 (material slot 1), not the whole monitor mesh. Clicks were measured on the full box, so the boxes sat offset from the codes. Hover and activate now ray-test that screen submesh and use its real UVs.
+- **Lens distortion.** The map camera's `RadarCameraVolume` bends the image (Lens Distortion intensity 0.45) after the codes are drawn. The same HDRP warp is applied to the glass UV before it is compared to a code, so the tip and the click land on the marker you see.
+- Bounds / flip / gameplay-viewport guesses are not used on this monitor anymore.
+
 ## 1.0.11
 
 - **Non-readable mesh safety** — before any `mesh.vertices` / `mesh.uv` / `mesh.triangles` access (barycentric UV), require `mesh.isReadable`. Ship `mapScreen` mesh `Cube.001` has Read/Write off; the old path spammed Unity Errors every hover/activate frame. Skip silently and keep tip/E via **ss / gvp / peek-cache / bounds / existing MeshCollider textureCoord**.

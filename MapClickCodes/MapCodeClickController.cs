@@ -422,6 +422,40 @@ internal static class MapCodeClickController
             return false;
         }
 
+        // 1.0.12: vanilla ship monitor — one path for hover and activate.
+        // The map RT is drawn only on Cube.001 submesh 1 (materialIndex), then HDRP
+        // LensDistortion (intensity 0.45 on RadarCameraVolume) warps it. Bounds/gvp/flip
+        // UVs do not match that image, so they must not run once this mesh is recognized.
+        if (IsVanillaShipMonitorMesh(screenMesh))
+        {
+            bool glass = TryShipMonitorContentViewport(ray, screenMesh, map, out bestUv, out uvTag);
+            bool aabb = glass
+                && TryScoreMarkersAtViewport(markerCam, bestUv, out matched, out score, out matchHow, out _)
+                && matchHow == "aabb";
+            if (!aabb)
+            {
+                if (!glass)
+                {
+                    uvTag = "ship-glass-miss";
+                    matchHow = "none";
+                    bestUv = default;
+                }
+                else if (matchHow != "aabb")
+                    matchHow = "screen-miss";
+
+                int markerCount = CountActiveMarkers();
+                string why = glass ? "ship-screen-no-aabb" : "ship-glass-miss";
+                if (alwaysLog && markerCount > 0)
+                    LogClickAttempt(hitDiag, bestUv, uvTag ?? "none", markerCount, $"miss why={why}");
+                else
+                    Plugin.V($"MapClick: miss why={why} markers={markerCount} {hitDiag} uvTag={uvTag}");
+                return false;
+            }
+
+            hitDiag += " | " + uvTag;
+            return true;
+        }
+
         if (!TryPickBestMarker(player, markerCam, hitPoint, screenMesh, requireMeshUv, out matched,
                 out score, out bestUv, out uvTag, out matchHow))
         {
@@ -1091,6 +1125,363 @@ internal static class MapCodeClickController
                || mesh.transform.IsChildOf(t)
                || hit.collider.GetComponent<MeshRenderer>() == mesh
                || hit.collider.GetComponentInParent<MeshRenderer>() == mesh;
+    }
+
+    // Vanilla ship mapScreen mesh "Cube.001" (sharedassets3 path 1126): 281 verts, not CPU-readable.
+    // materialIndex 1 draws mapTexture (455x315) on submesh 1 only. These are that submesh's
+    // vertices/UVs/triangles (mesh-local). UV scale on MapScreen is (1,1) offset (0,0).
+    private const int ShipMonitorVertexCount = 281;
+
+    private static readonly Vector3[] ShipScreenPos =
+    {
+        new Vector3(0.05606965f, -0.18378264f, -0.66083503f),
+        new Vector3(-0.06036048f, -0.39779341f, 0.34548202f),
+        new Vector3(0.05606965f, -0.18378264f, 0.53623223f),
+        new Vector3(-0.06036048f, -0.39779341f, -0.47008458f),
+        new Vector3(-0.20738617f, -1.73477769f, -0.66081136f),
+        new Vector3(-0.24570809f, -1.48850608f, 0.34549904f),
+        new Vector3(-0.20738617f, -1.73477769f, 0.53625590f),
+        new Vector3(-0.24570809f, -1.48850608f, -0.47006756f),
+    };
+
+    private static readonly Vector2[] ShipScreenUv =
+    {
+        new Vector2(1.00000000f, 0.00000000f),
+        new Vector2(0.85351562f, 0.84082031f),
+        new Vector2(1.00000000f, 1.00000000f),
+        new Vector2(0.85351562f, 0.15930176f),
+        new Vector2(0.00001127f, 0.00000024f),
+        new Vector2(0.15014648f, 0.84082031f),
+        new Vector2(0.00000006f, 1.00000000f),
+        new Vector2(0.15014648f, 0.15930176f),
+    };
+
+    private static readonly int[] ShipScreenTris =
+    {
+        0, 1, 2,
+        0, 3, 1,
+        4, 3, 0,
+        2, 1, 5,
+        3, 5, 1,
+        2, 5, 6,
+        6, 7, 4,
+        4, 7, 3,
+        6, 5, 7,
+        3, 7, 5,
+    };
+
+    // RadarCameraVolume on the map camera: LensDistortion intensity 0.45, center 0.5, scale 1.
+    // Used only if the live volume component cannot be read.
+    private const float VanillaLensIntensity = 0.45f;
+    private static bool _lensReflectTried;
+    private static bool _loggedLensFallback;
+    private static FieldInfo? _lensVolumeField;
+    private static Type? _lensDistortionType;
+    private static MethodInfo? _volumeTryGet;
+
+    private static bool IsVanillaShipMonitorMesh(MeshRenderer? screenMesh)
+    {
+        if (screenMesh == null)
+            return false;
+        var filter = screenMesh.GetComponent<MeshFilter>();
+        var mesh = filter != null ? filter.sharedMesh : null;
+        if (mesh == null)
+            return false;
+        return mesh.vertexCount == ShipMonitorVertexCount
+               && string.Equals(mesh.name, "Cube.001", StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Look ray → Cube.001 submesh-1 UV (what the glass shows) → HDRP DistortUV → mapCamera viewport.
+    /// That viewport is where markers were drawn before lens distortion.
+    /// </summary>
+    private static bool TryShipMonitorContentViewport(
+        Ray worldRay,
+        MeshRenderer screenMesh,
+        ManualCameraRenderer map,
+        out Vector2 viewport,
+        out string tag)
+    {
+        viewport = default;
+        tag = "ship-screen";
+        if (!TryRayMeshLocal(screenMesh.transform, worldRay, out Vector3 localOrigin, out Vector3 localDir))
+            return false;
+        if (!TryIntersectShipScreen(localOrigin, localDir, 12f, out Vector2 meshUv))
+            return false;
+
+        if (!TryReadMapLensDistortion(map, out float intensity, out float xMul, out float yMul, out Vector2 center, out float scale))
+        {
+            intensity = VanillaLensIntensity;
+            xMul = 1f;
+            yMul = 1f;
+            center = new Vector2(0.5f, 0.5f);
+            scale = 1f;
+            tag = "ship-screen|lens-vanilla";
+            if (!_loggedLensFallback)
+            {
+                _loggedLensFallback = true;
+                Plugin.V("MapClick: lens volume unread; using vanilla RadarCameraVolume intensity 0.45.");
+            }
+        }
+        else
+            tag = intensity > 0.001f || intensity < -0.001f
+                ? $"ship-screen|lens{intensity:F2}"
+                : "ship-screen|lens0";
+
+        viewport = DistortUvHdrp(meshUv, intensity, xMul, yMul, center, scale);
+        return true;
+    }
+
+    private static bool TryRayMeshLocal(Transform t, Ray worldRay, out Vector3 localOrigin, out Vector3 localDir)
+    {
+        localOrigin = t.InverseTransformPoint(worldRay.origin);
+        Vector3 localEnd = t.InverseTransformPoint(worldRay.origin + worldRay.direction);
+        localDir = localEnd - localOrigin;
+        if (localDir.sqrMagnitude < 1e-12f)
+            return false;
+        localDir.Normalize();
+        return true;
+    }
+
+    private static bool TryIntersectShipScreen(Vector3 origin, Vector3 dir, float maxDist, out Vector2 uv)
+    {
+        uv = default;
+        float bestT = maxDist;
+        bool hit = false;
+        for (int i = 0; i < ShipScreenTris.Length; i += 3)
+        {
+            Vector3 a = ShipScreenPos[ShipScreenTris[i]];
+            Vector3 b = ShipScreenPos[ShipScreenTris[i + 1]];
+            Vector3 c = ShipScreenPos[ShipScreenTris[i + 2]];
+            if (!RayTriangleBothSides(origin, dir, a, b, c, bestT, out float t, out float w0, out float w1, out float w2))
+                continue;
+            bestT = t;
+            Vector2 ua = ShipScreenUv[ShipScreenTris[i]];
+            Vector2 ub = ShipScreenUv[ShipScreenTris[i + 1]];
+            Vector2 uc = ShipScreenUv[ShipScreenTris[i + 2]];
+            uv = ua * w0 + ub * w1 + uc * w2;
+            hit = true;
+        }
+        return hit;
+    }
+
+    /// <summary>Möller–Trumbore, both windings. w0/w1/w2 are barycentric on a/b/c.</summary>
+    private static bool RayTriangleBothSides(
+        Vector3 origin, Vector3 dir, Vector3 a, Vector3 b, Vector3 c, float maxT,
+        out float t, out float w0, out float w1, out float w2)
+    {
+        t = 0f;
+        w0 = w1 = w2 = 0f;
+        Vector3 e1 = b - a;
+        Vector3 e2 = c - a;
+        Vector3 p = Vector3.Cross(dir, e2);
+        float det = Vector3.Dot(e1, p);
+        if (Mathf.Abs(det) < 1e-8f)
+            return false;
+        float inv = 1f / det;
+        Vector3 tvec = origin - a;
+        float bu = Vector3.Dot(tvec, p) * inv;
+        if (bu < -0.001f || bu > 1.001f)
+            return false;
+        Vector3 q = Vector3.Cross(tvec, e1);
+        float bv = Vector3.Dot(dir, q) * inv;
+        if (bv < -0.001f || bu + bv > 1.001f)
+            return false;
+        float bt = Vector3.Dot(e2, q) * inv;
+        if (bt < 0f || bt > maxT)
+            return false;
+        t = bt;
+        w1 = bu;
+        w2 = bv;
+        w0 = 1f - w1 - w2;
+        return true;
+    }
+
+    /// <summary>
+    /// HDRP/URP UberPost DistortUV. Output (mesh) UV → source viewport sampled into that pixel.
+    /// intensity is the -1..1 volume value (shader multiplies by 100).
+    /// </summary>
+    private static Vector2 DistortUvHdrp(Vector2 uv, float intensity, float xMul, float yMul, Vector2 center, float scale)
+    {
+        if (Mathf.Abs(intensity) < 1e-5f || scale < 1e-4f)
+            return uv;
+
+        float amount = 1.6f * Mathf.Max(Mathf.Abs(intensity * 100f), 1f);
+        float theta = Mathf.Deg2Rad * Mathf.Min(160f, amount);
+        float sigma = 2f * Mathf.Tan(theta * 0.5f);
+        Vector2 distCenter = center * 2f - Vector2.one;
+        float axisX = Mathf.Max(xMul, 1e-4f);
+        float axisY = Mathf.Max(yMul, 1e-4f);
+        float distTheta = intensity >= 0f ? theta : 1f / theta;
+        float distScale = 1f / scale;
+        float distIntensity = intensity * 100f;
+
+        uv = (uv - new Vector2(0.5f, 0.5f)) * distScale + new Vector2(0.5f, 0.5f);
+        Vector2 ruv = new Vector2(axisX * (uv.x - 0.5f - distCenter.x), axisY * (uv.y - 0.5f - distCenter.y));
+        float ru = ruv.magnitude;
+        if (ru < 1e-6f)
+            return uv;
+
+        float ru2 = distIntensity > 0f
+            ? Mathf.Tan(ru * distTheta) / (ru * sigma)
+            : (1f / ru) * distTheta * Mathf.Atan(ru * sigma);
+        return uv + ruv * (ru2 - 1f);
+    }
+
+    private static bool TryReadMapLensDistortion(
+        ManualCameraRenderer map,
+        out float intensity, out float xMul, out float yMul, out Vector2 center, out float scale)
+    {
+        intensity = 0f;
+        xMul = 1f;
+        yMul = 1f;
+        center = new Vector2(0.5f, 0.5f);
+        scale = 1f;
+        if (map == null)
+            return false;
+
+        EnsureLensReflect();
+        if (_lensVolumeField == null || _lensDistortionType == null || _volumeTryGet == null)
+            return false;
+
+        object volume;
+        try { volume = _lensVolumeField.GetValue(map); }
+        catch { return false; }
+        if (volume == null)
+            return false;
+
+        object? profile = null;
+        var shared = volume.GetType().GetProperty("sharedProfile");
+        if (shared != null)
+            profile = shared.GetValue(volume);
+        if (profile == null)
+        {
+            var profProp = volume.GetType().GetProperty("profile");
+            if (profProp != null)
+                profile = profProp.GetValue(volume);
+        }
+        if (profile == null)
+            return false;
+
+        object?[] args = { null };
+        bool ok;
+        try { ok = (bool)_volumeTryGet.Invoke(profile, args); }
+        catch { return false; }
+        if (!ok || args[0] == null)
+            return false;
+
+        object comp = args[0]!;
+        if (!ReadMemberBool(comp, "active", true))
+        {
+            intensity = 0f;
+            return true;
+        }
+
+        if (!TryReadVolumeFloat(comp, "intensity", out intensity, out bool intensityOverride))
+            return false;
+        if (!intensityOverride)
+            intensity = 0f;
+        TryReadVolumeFloat(comp, "xMultiplier", out xMul, out _);
+        TryReadVolumeFloat(comp, "yMultiplier", out yMul, out _);
+        TryReadVolumeVector2(comp, "center", out center);
+        TryReadVolumeFloat(comp, "scale", out scale, out _);
+        if (scale < 1e-4f)
+            scale = 1f;
+        return true;
+    }
+
+    private static void EnsureLensReflect()
+    {
+        if (_lensReflectTried)
+            return;
+        _lensReflectTried = true;
+        _lensVolumeField = typeof(ManualCameraRenderer).GetField("lensDistortionVolume",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        _lensDistortionType = FindType("UnityEngine.Rendering.HighDefinition.LensDistortion");
+        var profileType = FindType("UnityEngine.Rendering.VolumeProfile");
+        if (_lensDistortionType == null || profileType == null)
+            return;
+        foreach (var m in profileType.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+        {
+            if (m.Name != "TryGet" || !m.IsGenericMethodDefinition)
+                continue;
+            var ps = m.GetParameters();
+            if (ps.Length == 1 && ps[0].IsOut)
+            {
+                _volumeTryGet = m.MakeGenericMethod(_lensDistortionType);
+                break;
+            }
+        }
+    }
+
+    private static Type? FindType(string fullName)
+    {
+        var t = Type.GetType(fullName);
+        if (t != null)
+            return t;
+        var asms = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < asms.Length; i++)
+        {
+            t = asms[i].GetType(fullName);
+            if (t != null)
+                return t;
+        }
+        return null;
+    }
+
+    private static bool ReadMemberBool(object obj, string name, bool fallback)
+    {
+        var prop = obj.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (prop != null && prop.PropertyType == typeof(bool))
+            return (bool)prop.GetValue(obj);
+        var field = obj.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && field.FieldType == typeof(bool))
+            return (bool)field.GetValue(obj);
+        return fallback;
+    }
+
+    private static bool TryReadVolumeFloat(object comp, string name, out float value, out bool overrideState)
+    {
+        value = 0f;
+        overrideState = false;
+        var field = comp.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field == null)
+            return false;
+        object param = field.GetValue(comp);
+        if (param == null)
+            return false;
+        overrideState = ReadMemberBool(param, "overrideState", false);
+        var prop = param.GetType().GetProperty("value", BindingFlags.Instance | BindingFlags.Public);
+        if (prop == null)
+            return false;
+        object raw = prop.GetValue(param);
+        if (raw is float f)
+        {
+            value = f;
+            return true;
+        }
+        return false;
+    }
+
+    private static bool TryReadVolumeVector2(object comp, string name, out Vector2 value)
+    {
+        value = new Vector2(0.5f, 0.5f);
+        var field = comp.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field == null)
+            return false;
+        object param = field.GetValue(comp);
+        if (param == null)
+            return false;
+        var prop = param.GetType().GetProperty("value", BindingFlags.Instance | BindingFlags.Public);
+        if (prop == null)
+            return false;
+        object raw = prop.GetValue(param);
+        if (raw is Vector2 v)
+        {
+            value = v;
+            return true;
+        }
+        return false;
     }
 
     /// <summary>

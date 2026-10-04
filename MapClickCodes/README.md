@@ -4,6 +4,7 @@ Click a **terminal code marker** (door / turret / mine / trap / etc.) on the **m
 
 ## Features
 
+- **Aligned click boxes (1.0.12)** — ship radar hits use the screen submesh UV plus the map camera's lens distortion, so the hover tip and E land on the code you see. The old full-monitor box guess is not used on that screen.
 - **Tip → E sync (1.0.10)** — hover tip caches the resolved marker for 0.25s; E activates that same object (`via=peek-cache`) so tip code always matches activate even when UV is messy.
 - **Gameplay-viewport match (1.0.10)** — markers projected through the monitor glass into gameplay viewport (`how=gvp`); preferred over broken screen-space AABB (V≈0 / `ss-uv-no-aabb`).
 - **Screen-space UV (1.0.9+)** — UV from the visible monitor face (multi-winding inverse bilinear). MeshCollider UV kept as bonus.

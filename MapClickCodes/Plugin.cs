@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "com.benhough.lethal.MapClickCodes";
     public const string ModName = "MapClickCodes";
-    public const string ModVersion = "1.0.11";
+    public const string ModVersion = "1.0.12";
 
     internal static Plugin Instance { get; private set; } = null!;
     internal static ManualLogSource Log { get; private set; } = null!;
@@ -54,7 +54,7 @@ public class Plugin : BaseUnityPlugin
             "General",
             "FlipUvV",
             true,
-            "Flip V when converting mesh UV to mapCamera viewport. Try toggling if markers feel vertically inverted.");
+            "Unused on the vanilla ship monitor (1.0.12 uses the screen submesh UV). Still a tie-break for other panels.");
         InteractRange = Config.Bind(
             "General",
             "InteractRange",
